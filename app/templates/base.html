@@ -1,0 +1,59 @@
+<!-- 공통 레이아웃(틀) -->
+
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ title or "Inhouse Service" }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">Nota AI</div>
+
+      <!-- 메뉴는 아직 안 넣음: 틀만 -->
+      <nav class="nav"></nav>
+
+      <div class="sidebar-footer">
+        <!-- 현재 시간 표시 -->
+        <div id="current-time" class="small">현재: --</div>
+
+        <!-- 이메일: 왼쪽에 동그라미 아이콘 + 이메일 -->
+        <div class="email-row">
+          <span class="email-icon" aria-hidden="true">I</span>
+          <span class="small muted">{{ user_email or "nota_inhouse@nota.ai" }}</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <script>
+  (function () {
+    const el = document.getElementById("current-time");
+    if (!el) return;
+
+    const pad = (n) => String(n).padStart(2, "0");
+
+    function tick() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = pad(d.getMonth() + 1);
+      const day = pad(d.getDate());
+      const hh = pad(d.getHours());
+      const mm = pad(d.getMinutes());
+      const ss = pad(d.getSeconds());
+      el.textContent = `현재: ${y}-${m}-${day} ${hh}:${mm}`;
+    }
+
+    tick();
+    setInterval(tick, 1000);
+  })();
+  </script>
+</body>
+</html>
