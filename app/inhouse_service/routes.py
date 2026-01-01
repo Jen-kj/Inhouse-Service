@@ -1,5 +1,8 @@
-﻿import os
+﻿import json
+import glob
+import os
 import random
+import shutil
 import time
 from datetime import datetime
 
@@ -31,7 +34,34 @@ from app.db import (
 REQUESTER_POOL = ["김민수", "이서연", "박준호", "최지우", "정하늘", "오유진", "nota_inhouse"]
 
 _WHISPER_MODEL = None
-_SUMMARY_PIPELINE = None
+_OPENAI_CLIENT = None
+
+
+
+def _ensure_ffmpeg_in_path():
+    if shutil.which("ffmpeg"):
+        return
+
+    local_app = os.environ.get("LOCALAPPDATA")
+    if not local_app:
+        return
+
+    pattern = os.path.join(
+        local_app,
+        "Microsoft",
+        "WinGet",
+        "Packages",
+        "Gyan.FFmpeg_*",
+        "ffmpeg-*-full_build",
+        "bin",
+        "ffmpeg.exe",
+    )
+    matches = glob.glob(pattern)
+    if not matches:
+        return
+
+    ffmpeg_dir = os.path.dirname(matches[0])
+    os.environ["PATH"] = f"{ffmpeg_dir};{os.environ.get('PATH', '')}"
 
 
 def _pick_requester():
@@ -53,42 +83,194 @@ def _save_upload(file, folder_name):
     return f"/static/uploads/{folder_name}/{stored_name}"
 
 
-def _transcribe_audio(audio_path):
+def _transcribe_audio(audio_path, language="ko"):
     global _WHISPER_MODEL
     if not audio_path:
         return ""
 
     try:
+        _ensure_ffmpeg_in_path()
         import whisper
 
         if _WHISPER_MODEL is None:
             _WHISPER_MODEL = whisper.load_model("base")
-        result = _WHISPER_MODEL.transcribe(audio_path)
+        result = _WHISPER_MODEL.transcribe(audio_path, language=language)
         return (result.get("text") or "").strip()
-    except Exception:
+    except Exception as exc:
+        print(f"[nota-space] whisper failed: {exc}")
         return ""
 
 
-def _summarize_text(text):
-    global _SUMMARY_PIPELINE
-    if not text:
-        return ""
+def _get_openai_client():
+    global _OPENAI_CLIENT
+    if _OPENAI_CLIENT is None:
+        # Install: .\.venv\Scripts\python.exe -m pip install openai
+        from openai import OpenAI
+        _OPENAI_CLIENT = OpenAI()
+    return _OPENAI_CLIENT
+
+
+def _truncate_meeting_text(text: str, max_chars: int = 14000) -> str:
+    cleaned = (text or "").strip()
+    if len(cleaned) <= max_chars:
+        return cleaned
+
+    head_size = min(9000, max_chars - 4000)
+    tail_size = max_chars - head_size
+    head = cleaned[:head_size].rstrip()
+    tail = cleaned[-tail_size:].lstrip()
+    return f"{head}\n\n...(중간 내용 생략됨)...\n\n{tail}"
+
+
+def _summarize_with_openai_structured(text: str) -> dict | None:
+    input_text = _truncate_meeting_text(text)
+    if not input_text:
+        return None
+
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        print("[nota-space] openai failed: OPENAI_API_KEY missing")
+        return None
+
+    model = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+    schema = {
+        "name": "meeting_summary",
+        "strict": True,
+        "schema": {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "title": {"type": "string"},
+                "topics": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "properties": {
+                            "title": {"type": "string"},
+                            "summary_bullets": {"type": "array", "items": {"type": "string"}},
+                            "decisions": {"type": "array", "items": {"type": "string"}},
+                        },
+                        "required": ["title", "summary_bullets", "decisions"],
+                    },
+                },
+                "action_items": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "properties": {
+                            "owner": {"type": "string"},
+                            "task": {"type": "string"},
+                            "due": {"type": "string"},
+                        },
+                        "required": ["owner", "task", "due"],
+                    },
+                },
+                "overall_summary": {"type": "string"},
+            },
+            "required": ["title", "topics", "action_items", "overall_summary"],
+        },
+    }
+
+    system_prompt = (
+        "너는 회의록 요약 어시스턴트다. 입력 텍스트에서 주제를 3~6개 추출하고,"
+        " 각 주제마다 2~4개의 요약 bullet을 작성한다. '이제/마지막으로/여기까지' 같은 말버릇을"
+        " 주제 제목으로 쓰지 말고, 구체적인 주제로 제목을 만든다."
+        " 결정사항은 '확정/승인/하기로/결정' 근거가 있을 때만 포함한다."
+        " 실행 항목은 담당자/할 일/기한이 명확할 때만 포함하며 없으면 빈 배열로 둔다."
+        " 누락 필드는 만들지 말고, 값이 없으면 빈 문자열/빈 배열로 채운다."
+    )
 
     try:
-        from transformers import pipeline
+        client = _get_openai_client()
+        response = client.responses.create(
+            model=model,
+            temperature=0.2,
+            instructions=system_prompt,
+            input=input_text,
+            text={"format": {"type": "json_schema", "json_schema": schema}},
+        )
 
-        if _SUMMARY_PIPELINE is None:
-            _SUMMARY_PIPELINE = pipeline("summarization", model="facebook/bart-large-cnn")
+        output_text = getattr(response, "output_text", None)
+        if not output_text:
+            chunks = []
+            for output in getattr(response, "output", []) or []:
+                if getattr(output, "type", None) != "message":
+                    continue
+                for content in getattr(output, "content", []) or []:
+                    if getattr(content, "type", None) == "output_text":
+                        chunks.append(getattr(content, "text", ""))
+            output_text = "".join(chunks).strip()
 
-        cleaned = " ".join(text.split())
-        if len(cleaned) > 4000:
-            cleaned = cleaned[:4000]
+        parsed = json.loads(output_text or "{}")
+        if not isinstance(parsed, dict):
+            return None
+        return parsed
+    except Exception as exc:
+        print(f"[nota-space] openai failed: {type(exc).__name__}: {exc}")
+        return None
 
-        output = _SUMMARY_PIPELINE(cleaned, max_length=140, min_length=40, do_sample=False)
-        return (output[0].get("summary_text") or "").strip()
-    except Exception:
-        return "AI summary unavailable."
 
+def _render_summary_text(summary: dict) -> str:
+    title = (summary or {}).get("title") or ""
+    topics = (summary or {}).get("topics") or []
+    decisions_all = []
+    action_items = (summary or {}).get("action_items") or []
+    overall_summary = (summary or {}).get("overall_summary") or ""
+
+    lines = ["📌 주요 논의 사항"]
+    if title:
+        lines.append(f"회의 제목: {title}")
+    lines.append("")
+
+    for topic in topics:
+        topic_title = (topic or {}).get("title") or "기타"
+        lines.append(f"■ {topic_title}")
+        bullets = (topic or {}).get("summary_bullets") or []
+        for bullet in bullets:
+            if bullet:
+                lines.append(f"- {bullet}")
+        decisions = (topic or {}).get("decisions") or []
+        for decision in decisions:
+            if decision:
+                decisions_all.append(decision)
+        lines.append("")
+
+    seen = set()
+    deduped_decisions = []
+    for item in decisions_all:
+        if item not in seen:
+            seen.add(item)
+            deduped_decisions.append(item)
+
+    lines.append("✅ 결정된 사항")
+    if deduped_decisions:
+        for decision in deduped_decisions:
+            lines.append(f"- {decision}")
+    else:
+        lines.append("- (없음)")
+    lines.append("")
+
+    lines.append("🎯 실행 항목")
+    if action_items:
+        for action in action_items:
+            owner = (action or {}).get("owner") or ""
+            task = (action or {}).get("task") or ""
+            due = (action or {}).get("due") or ""
+            if not (owner or task or due):
+                continue
+            if due:
+                lines.append(f"- {owner} - {task} (~ {due})")
+            else:
+                lines.append(f"- {owner} - {task}")
+    else:
+        lines.append("- (없음)")
+    lines.append("")
+
+    lines.append("🧾 전체 요약")
+    lines.append(overall_summary)
+    return "\n".join(lines).strip()
 
 @bp.get("/")
 def home():
@@ -107,23 +289,23 @@ def nota_space_home():
 
 @bp.get("/nota-space/room-booking")
 def nota_space_room_booking():
-    return render_template("nota_space_room_booking.html", active="nota-space", subnav="room-booking")
+    return render_template("nota_space/booking.html", active="nota-space", subnav="room-booking")
 
 
 @bp.get("/nota-space/room-booking/list")
 def nota_space_room_booking_list():
-    return render_template("nota_space_booking_list.html", active="nota-space", subnav="room-booking")
+    return render_template("nota_space/booking_list.html", active="nota-space", subnav="room-booking")
 
 
 @bp.get("/nota-space/meeting-log")
 def nota_space_meeting_log():
-    return render_template("nota_space_meeting_log.html", active="nota-space", subnav="meeting-log")
+    return render_template("nota_space/meeting_log.html", active="nota-space", subnav="meeting-log")
 
 
 @bp.get("/nota-space/meeting-log/new")
 def nota_space_meeting_log_new():
     return render_template(
-        "nota_space_meeting_log_form.html",
+        "nota_space/meeting_log_form.html",
         active="nota-space",
         subnav="meeting-log",
         booking_id=None,
@@ -134,7 +316,7 @@ def nota_space_meeting_log_new():
 @bp.get("/nota-space/meeting-log/<int:booking_id>")
 def nota_space_meeting_log_for_booking(booking_id):
     return render_template(
-        "nota_space_meeting_log_form.html",
+        "nota_space/meeting_log_form.html",
         active="nota-space",
         subnav="meeting-log",
         booking_id=booking_id,
@@ -145,7 +327,7 @@ def nota_space_meeting_log_for_booking(booking_id):
 @bp.get("/nota-space/meeting-log/entry/<int:log_id>")
 def nota_space_meeting_log_entry(log_id):
     return render_template(
-        "nota_space_meeting_log_form.html",
+        "nota_space/meeting_log_form.html",
         active="nota-space",
         subnav="meeting-log",
         booking_id=None,
@@ -258,17 +440,39 @@ def nota_space_meeting_log_detail(log_id):
     return jsonify({"log": log})
 
 
-@bp.post("/nota-space/meeting-summary")
+@bp.post("/api/nota-space/meeting-summary")
 def nota_space_meeting_summary():
-    payload = request.get_json(silent=True) or {}
-    meeting_text = (payload.get("meeting_text") or "").strip()
-    if not meeting_text:
-        return jsonify({"error": "회의 내용을 입력하세요."}), 400
-    if len(meeting_text) < 20:
-        return jsonify({"error": "회의 내용이 너무 짧습니다."}), 400
+    meeting_text = (request.form.get("meeting_text") or "").strip()
+    audio_file = request.files.get("audio_file")
 
-    summary = _summarize_text(meeting_text)
-    return jsonify({"summary_text": summary})
+    if not meeting_text and not (audio_file and audio_file.filename):
+        return jsonify({"error": "회의 내용 또는 녹음 파일을 추가하세요."}), 400
+
+    audio_path = None
+    transcript = ""
+    if audio_file and audio_file.filename:
+        audio_path = _save_upload(audio_file, "nota_space")
+        if audio_path:
+            absolute_audio = os.path.join(BASE_DIR, "app", audio_path.lstrip("/"))
+            transcript = _transcribe_audio(absolute_audio)
+
+    combined_parts = []
+    if meeting_text:
+        combined_parts.append(meeting_text)
+    if transcript:
+        combined_parts.append(f"녹음 텍스트:\n{transcript}")
+    combined_text = "\n\n".join(combined_parts)
+    if not combined_text.strip():
+        return jsonify({"error": "녹음 텍스트를 추출하지 못했습니다."}), 400
+
+    result = _summarize_with_openai_structured(combined_text)
+    if not result:
+        return jsonify({"summary": None, "summary_error": "OPENAI_FAILED"}), 502
+
+    summary_text = _render_summary_text(result)
+    return jsonify({"summary": summary_text, "summary_json": result})
+
+
 
 
 @bp.post("/api/nota-space/bookings")
@@ -316,6 +520,7 @@ def create_nota_space_booking():
 def create_nota_space_meeting_log():
     booking_id = request.form.get("booking_id")
     notes = (request.form.get("notes") or "").strip()
+    audio_file = request.files.get("audio")
     title = (request.form.get("title") or "").strip()
     author = (request.form.get("author") or "").strip()
     meeting_date = request.form.get("meeting_date") or None
@@ -328,8 +533,9 @@ def create_nota_space_meeting_log():
         return jsonify({"error": "Title is required for non-booking logs"}), 400
     if not booking_id and not author:
         return jsonify({"error": "Author is required for non-booking logs"}), 400
-    if not notes:
-        return jsonify({"error": "회의 내용을 입력하세요."}), 400
+    if not notes and not (audio_file and audio_file.filename):
+        return jsonify({"error": "회의 내용 또는 녹음 파일을 추가하세요."}), 400
+
 
     booking_id_value = None
     if booking_id:
@@ -340,14 +546,31 @@ def create_nota_space_meeting_log():
         if not fetch_booking_by_id(booking_id_value):
             return jsonify({"error": "Booking not found"}), 404
 
+    audio_path = None
+    transcript = ""
+    if audio_file and audio_file.filename:
+        audio_path = _save_upload(audio_file, "nota_space")
+        if audio_path:
+            absolute_audio = os.path.join(BASE_DIR, "app", audio_path.lstrip("/"))
+            transcript = _transcribe_audio(absolute_audio)
+
+    combined_parts = []
+    if notes:
+        combined_parts.append(notes)
+    if transcript:
+        combined_parts.append(f"녹음 텍스트:\n{transcript}")
+    combined_text = "\n\n".join(combined_parts)
+
     if not summary:
-        summary = _summarize_text(notes)
+        result = _summarize_with_openai_structured(combined_text)
+        summary = _render_summary_text(result) if result else ""
+
 
     updated_at = upsert_meeting_log_entry(
         booking_id_value,
         notes or None,
-        None,
-        None,
+        audio_path,
+        transcript or None,
         summary or None,
         title=title or None,
         author=author or None,

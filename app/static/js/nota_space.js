@@ -540,8 +540,8 @@ if (notaSpacePage) {
       event.preventDefault();
       const formData = new FormData(form);
       const notes = String(formData.get("notes") || "").trim();
-      if (!notes) {
-        if (message) message.textContent = "회의 내용을 입력하세요.";
+      if (!notes && !(formData.get("audio") && formData.get("audio").name)) {
+        if (message) message.textContent = "회의 내용 또는 녹음 파일을 추가하세요.";
         return;
       }
 
@@ -559,37 +559,6 @@ if (notaSpacePage) {
     });
   }
 
-  function bindSummaryGenerator() {
-    const button = $("#ns-generate-summary");
-    if (!button) return;
-
-    button.addEventListener("click", async () => {
-      const notesEl = $("#ns-notes");
-      const notes = notesEl ? String(notesEl.value || "").trim() : "";
-      if (!notes) {
-        if (summaryMessage) summaryMessage.textContent = "회의 내용을 입력하세요.";
-        return;
-      }
-
-      if (summaryMessage) summaryMessage.textContent = "요약을 생성 중입니다...";
-      const { res, data } = await App.fetchJson("/nota-space/meeting-summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ meeting_text: notes })
-      });
-
-      if (!res.ok) {
-        if (summaryMessage) {
-          summaryMessage.textContent = (data && data.error) || "요약 생성에 실패했습니다.";
-        }
-        return;
-      }
-
-      setSummaryText(data && data.summary_text ? data.summary_text : "");
-      if (summaryMessage) summaryMessage.textContent = "요약이 생성되었습니다.";
-      if (summarySection) summarySection.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }
 
   document.addEventListener("DOMContentLoaded", async () => {
     if (pageType === "room-booking") {
@@ -613,7 +582,6 @@ if (notaSpacePage) {
     if (pageType === "meeting-log-form") {
       await loadMeetingLogForm();
       bindMeetingLogForm();
-      bindSummaryGenerator();
       const inputs = [directAuthor, directDate, directRoom, directStart, directEnd];
       inputs.filter(Boolean).forEach((input) => {
         input.addEventListener("input", updateMetaFromInputs);

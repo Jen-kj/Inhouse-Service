@@ -83,23 +83,30 @@
 
 .ns-meeting-meta {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px 24px;
 }
 
 .ns-meta-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
   font-size: 13px;
   color: #1e293b;
 }
 
 .ns-meta-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--app-muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.ns-meta-value {
+  font-weight: 600;
+  color: #0f172a;
 }
 
 .ns-card-header {
@@ -428,11 +435,31 @@
   gap: 8px;
 }
 
-.ns-summary-section {
+.ns-summary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+}
+
+.ns-summary-icon {
+  display: inline-flex;
+}
+
+.ns-summary-box {
+  background: #eaf4ff;
+  border-left: 4px solid #0ea5e9;
+  border-radius: 12px;
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding-top: 4px;
+}
+
+.ns-summary-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
 }
 
 .ns-summary-text {
@@ -663,3 +690,12 @@ body.ns-modal-open {
   }
 }
 
+@media (max-width: 720px) {
+  .ns-meeting-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .ns-meta-item {
+    grid-template-columns: 80px minmax(0, 1fr);
+  }
+}
