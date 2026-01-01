@@ -113,6 +113,8 @@ function renderSummary() {
   if (!summaryData) return;
 
   const cards = [];
+  ui.summaryGrid.classList.toggle("is-category", state.summaryMode === "category");
+  ui.summaryGrid.classList.toggle("is-status", state.summaryMode === "status");
 
   if (state.summaryMode === "category") {
     CATEGORY_OPTIONS.forEach((category) => {
@@ -141,20 +143,20 @@ function renderSummary() {
     STATUS_OPTIONS.forEach((status) => {
       const total = summaryData.by_status[status.value] || 0;
       const isSelected = state.status === status.value;
+      const statusClass = `sd-status-${status.value.toLowerCase()}`;
       const chipHtml = CATEGORY_OPTIONS.map((category) => {
         const count = summaryData.by_status_category[status.value][category.value] || 0;
         const isChipSelected = isSelected && state.category === category.value;
         return `
-          <button class="sd-chip ${status.badgeClass} ${isChipSelected ? "is-active" : ""}" data-status="${status.value}" data-category="${category.value}" type="button">
+          <button class="sd-chip ${isChipSelected ? "is-active" : ""}" data-status="${status.value}" data-category="${category.value}" type="button">
             ${category.label} <span>${count}</span>
           </button>
         `;
       }).join("");
 
       cards.push(`
-        <div class="sd-card ${isSelected ? "is-selected" : ""}" data-status="${status.value}">
+        <div class="sd-card ${statusClass} ${isSelected ? "is-selected" : ""}" data-status="${status.value}">
           <div class="sd-card-title">${status.label}</div>
-          <div class="sd-card-team">상태 기준</div>
           <div class="sd-card-count">${total}</div>
           <div class="sd-card-chips">${chipHtml}</div>
         </div>
@@ -168,31 +170,49 @@ function renderSummary() {
 
 function renderFilterPills() {
   const pills = [];
+  const activeFilters = [];
   if (state.category) {
     const category = getCategoryInfo(state.category);
     pills.push(`
       <button class="sd-filter-pill" data-type="category" type="button">
-        필터: 카테고리=${category ? category.label : state.category} <span>✕</span>
+        ${category ? category.label : state.category} <span>X</span>
       </button>
     `);
+    activeFilters.push("category");
   }
   if (state.status) {
     const status = getStatusInfo(state.status);
     pills.push(`
       <button class="sd-filter-pill" data-type="status" type="button">
-        필터: 상태=${status ? status.label : state.status} <span>✕</span>
+        ${status ? status.label : state.status} <span>X</span>
       </button>
     `);
+    activeFilters.push("status");
   }
   if (state.q) {
     pills.push(`
       <button class="sd-filter-pill" data-type="q" type="button">
-        필터: 검색=${state.q} <span>✕</span>
+        ${state.q} <span>X</span>
       </button>
     `);
+    activeFilters.push("q");
+  }
+  if (state.sort && state.sort !== "newest") {
+    const sortLabelMap = {
+      newest: "최신순",
+      pending_oldest: "대기 오래된 순",
+      urgency: "긴급도순"
+    };
+    pills.push(`
+      <button class="sd-filter-pill" data-type="sort" type="button">
+        ${sortLabelMap[state.sort] || state.sort} <span>X</span>
+      </button>
+    `);
+    activeFilters.push("sort");
   }
 
   ui.filterPills.innerHTML = pills.join("") || "<span class=\"sd-filter-empty\">적용된 필터가 없습니다.</span>";
+  ui.resetBtn.style.display = activeFilters.length ? "inline-flex" : "none";
 }
 
 function renderTable(tickets) {
@@ -241,7 +261,7 @@ function renderTable(tickets) {
       <tr>
         <td>${ticket.title}</td>
         <td>
-          <span class="sd-urgency ${urgency ? urgency.className : "sd-urgency-normal"}">${
+          <span class="sd-urgency-text ${urgency ? urgency.className : "sd-urgency-normal"}">${
             urgency ? urgency.label : "보통"
           }</span>
         </td>
@@ -384,6 +404,7 @@ function bindEvents() {
     if (type === "category") state.category = "";
     if (type === "status") state.status = "";
     if (type === "q") state.q = "";
+    if (type === "sort") state.sort = "newest";
     syncUIFromFilters();
     fetchRequests();
   });
