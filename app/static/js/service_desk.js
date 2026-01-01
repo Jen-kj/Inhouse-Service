@@ -30,8 +30,8 @@ let searchTimer = null;
 let summaryData = null;
 let lastRequests = [];
 
-const $ = (selector) => document.querySelector(selector);
-const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+const $ = (selector) => App.qs(selector);
+const $$ = (selector) => App.qsa(selector);
 
 const ui = {
   summaryGrid: $("#sd-summary-grid"),
@@ -325,19 +325,11 @@ function handleSummaryClick(event) {
 }
 
 function openPanel() {
-  ui.overlay.classList.add("is-open");
-  ui.panel.classList.add("is-open");
-  document.body.classList.add("sd-panel-open");
-  ui.panel.setAttribute("aria-hidden", "false");
-  ui.overlay.setAttribute("aria-hidden", "false");
+  App.openModal({ panel: ui.panel, overlay: ui.overlay, bodyClass: "sd-panel-open" });
 }
 
 function closePanel() {
-  ui.overlay.classList.remove("is-open");
-  ui.panel.classList.remove("is-open");
-  document.body.classList.remove("sd-panel-open");
-  ui.panel.setAttribute("aria-hidden", "true");
-  ui.overlay.setAttribute("aria-hidden", "true");
+  App.closeModal({ panel: ui.panel, overlay: ui.overlay, bodyClass: "sd-panel-open" });
 }
 
 async function submitForm(event) {

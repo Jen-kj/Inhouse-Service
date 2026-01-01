@@ -1,0 +1,46 @@
+﻿{% extends "base.html" %}
+{% set title = "Nota Space - Meeting Log" %}
+
+{% block content %}
+<div class="page" data-page="meeting-log">
+  <div class="page-header">
+    <div>
+      <div class="page-eyebrow">Nota Space</div>
+      <h1 class="page-title">Meeting Log</h1>
+      <p class="page-subtitle">회의 기록을 저장하고 AI 요약을 확인하세요.</p>
+    </div>
+    <div class="ns-date">
+      <label for="ns-log-date" class="form-label">날짜</label>
+      <input id="ns-log-date" class="form-input" type="date" />
+    </div>
+  </div>
+
+  <div class="ns-layout">
+    <section class="ns-card">
+      <div class="ns-card-title">예약 목록</div>
+      <div class="ns-log-list" id="ns-log-list"></div>
+    </section>
+
+    <section class="ns-card ns-form-card">
+      <div class="ns-card-title">회의 로그 작성</div>
+      <form id="ns-log-form" class="form-stack">
+        <label class="form-label" for="ns-log-booking">예약 선택</label>
+        <select id="ns-log-booking" name="booking_id" class="form-select" required></select>
+
+        <label class="form-label" for="ns-notes">회의 노트</label>
+        <textarea id="ns-notes" name="notes" class="form-input" rows="6" placeholder="텍스트 메모를 입력하세요"></textarea>
+
+        <label class="form-label" for="ns-audio">오디오 파일 (선택)</label>
+        <input id="ns-audio" name="audio" class="form-input" type="file" accept="audio/*" />
+
+        <div class="ns-form-actions">
+          <button class="btn ns-btn" type="submit">로그 저장</button>
+        </div>
+        <div class="ns-form-note" id="ns-log-message"></div>
+      </form>
+    </section>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/nota_space.js') }}"></script>
+{% endblock %}

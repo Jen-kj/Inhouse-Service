@@ -56,6 +56,65 @@ def init_db():
         if count == 0:
             seed_tickets(conn)
 
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS rooms (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                feature TEXT NOT NULL,
+                recommended_use TEXT NOT NULL,
+                capacity INTEGER,
+                room_type TEXT NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS bookings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                room_id INTEGER NOT NULL,
+                date TEXT NOT NULL,
+                start_time TEXT NOT NULL,
+                end_time TEXT NOT NULL,
+                agenda TEXT NOT NULL,
+                presenter TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY(room_id) REFERENCES rooms(id)
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS meeting_participants (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                booking_id INTEGER NOT NULL,
+                participant_name TEXT NOT NULL,
+                FOREIGN KEY(booking_id) REFERENCES bookings(id)
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS meeting_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                booking_id INTEGER NOT NULL UNIQUE,
+                notes TEXT,
+                audio_path TEXT,
+                transcript TEXT,
+                summary TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY(booking_id) REFERENCES bookings(id)
+            )
+            """
+        )
+        conn.commit()
+
+        room_count = conn.execute("SELECT COUNT(*) FROM rooms").fetchone()[0]
+        if room_count == 0:
+            seed_rooms(conn)
+
 
 def seed_tickets(conn):
     titles = [
@@ -252,6 +311,237 @@ def update_ticket_status(ticket_id, status):
             """,
             {"status": status, "updated_at": now, "id": ticket_id},
         )
+        conn.commit()
+
+    return now
+
+
+def seed_rooms(conn):
+    rooms = [
+        {
+            "name": "Disagree & Commit",
+            "feature": "Large meeting room (16+), intense discussions",
+            "recommended_use": "All-hands, seminars, heated debates",
+            "capacity": 16,
+            "room_type": "meeting",
+        },
+        {
+            "name": "Ownership",
+            "feature": "Round table, horizontal communication",
+            "recommended_use": "Brainstorming, hierarchy-free discussions",
+            "capacity": 8,
+            "room_type": "meeting",
+        },
+        {
+            "name": "Customer-Centric",
+            "feature": "Ping-pong table meeting room",
+            "recommended_use": "Customer-focused decisions, action items",
+            "capacity": 10,
+            "room_type": "meeting",
+        },
+        {
+            "name": "Trust",
+            "feature": "Smart window, external guests",
+            "recommended_use": "External meetings, confidential discussions",
+            "capacity": 6,
+            "room_type": "external",
+        },
+        {
+            "name": "Focus Room",
+            "feature": "Single-person focus room, cozy lighting",
+            "recommended_use": "Deep work, private calls",
+            "capacity": 1,
+            "room_type": "focus",
+        },
+        {
+            "name": "LP Rooms - Dive Deep",
+            "feature": "6-person room named after leadership principle",
+            "recommended_use": "General team meetings",
+            "capacity": 6,
+            "room_type": "meeting",
+        },
+        {
+            "name": "LP Rooms - Think Big",
+            "feature": "6-person room named after leadership principle",
+            "recommended_use": "General team meetings",
+            "capacity": 6,
+            "room_type": "meeting",
+        },
+    ]
+
+    conn.executemany(
+        """
+        INSERT INTO rooms (name, feature, recommended_use, capacity, room_type)
+        VALUES (:name, :feature, :recommended_use, :capacity, :room_type)
+        """,
+        rooms,
+    )
+    conn.commit()
+
+
+def fetch_rooms():
+    with get_connection() as conn:
+        rows = conn.execute("SELECT * FROM rooms ORDER BY name ASC").fetchall()
+    return [dict(row) for row in rows]
+
+
+def fetch_bookings(date_value):
+    with get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT b.*, r.name as room_name, r.room_type, r.feature, r.recommended_use, r.capacity
+            FROM bookings b
+            JOIN rooms r ON r.id = b.room_id
+            WHERE b.date = :date
+            ORDER BY b.start_time ASC
+            """,
+            {"date": date_value},
+        ).fetchall()
+
+        participants = conn.execute(
+            """
+            SELECT booking_id, participant_name
+            FROM meeting_participants
+            WHERE booking_id IN (
+                SELECT id FROM bookings WHERE date = :date
+            )
+            """,
+            {"date": date_value},
+        ).fetchall()
+
+        logs = conn.execute(
+            """
+            SELECT booking_id, summary, notes, audio_path, transcript
+            FROM meeting_logs
+            WHERE booking_id IN (
+                SELECT id FROM bookings WHERE date = :date
+            )
+            """,
+            {"date": date_value},
+        ).fetchall()
+
+    participants_map = {}
+    for row in participants:
+        participants_map.setdefault(row["booking_id"], []).append(row["participant_name"])
+
+    logs_map = {row["booking_id"]: dict(row) for row in logs}
+
+    result = []
+    for row in rows:
+        item = dict(row)
+        item["participants"] = participants_map.get(row["id"], [])
+        item["log"] = logs_map.get(row["id"])
+        result.append(item)
+    return result
+
+
+def create_booking(data):
+    now = _now_iso()
+    with get_connection() as conn:
+        cur = conn.execute(
+            """
+            INSERT INTO bookings (
+                room_id, date, start_time, end_time, agenda, presenter, created_at, updated_at
+            ) VALUES (
+                :room_id, :date, :start_time, :end_time, :agenda, :presenter, :created_at, :updated_at
+            )
+            """,
+            {
+                "room_id": data["room_id"],
+                "date": data["date"],
+                "start_time": data["start_time"],
+                "end_time": data["end_time"],
+                "agenda": data["agenda"],
+                "presenter": data["presenter"],
+                "created_at": now,
+                "updated_at": now,
+            },
+        )
+        booking_id = cur.lastrowid
+
+        participants = data.get("participants") or []
+        if participants:
+            conn.executemany(
+                """
+                INSERT INTO meeting_participants (booking_id, participant_name)
+                VALUES (:booking_id, :participant_name)
+                """,
+                [{"booking_id": booking_id, "participant_name": name} for name in participants],
+            )
+
+        conn.commit()
+
+    return booking_id
+
+
+def has_booking_conflict(room_id, date_value, start_time, end_time):
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT COUNT(*) as count
+            FROM bookings
+            WHERE room_id = :room_id
+              AND date = :date
+              AND NOT (end_time <= :start_time OR start_time >= :end_time)
+            """,
+            {
+                "room_id": room_id,
+                "date": date_value,
+                "start_time": start_time,
+                "end_time": end_time,
+            },
+        ).fetchone()
+    return row["count"] > 0
+
+
+def upsert_meeting_log(booking_id, notes, audio_path, transcript, summary):
+    now = _now_iso()
+    with get_connection() as conn:
+        existing = conn.execute(
+            "SELECT id FROM meeting_logs WHERE booking_id = :booking_id",
+            {"booking_id": booking_id},
+        ).fetchone()
+
+        if existing:
+            conn.execute(
+                """
+                UPDATE meeting_logs
+                SET notes = :notes,
+                    audio_path = :audio_path,
+                    transcript = :transcript,
+                    summary = :summary,
+                    updated_at = :updated_at
+                WHERE booking_id = :booking_id
+                """,
+                {
+                    "notes": notes,
+                    "audio_path": audio_path,
+                    "transcript": transcript,
+                    "summary": summary,
+                    "updated_at": now,
+                    "booking_id": booking_id,
+                },
+            )
+        else:
+            conn.execute(
+                """
+                INSERT INTO meeting_logs (
+                    booking_id, notes, audio_path, transcript, summary, created_at, updated_at
+                ) VALUES (
+                    :booking_id, :notes, :audio_path, :transcript, :summary, :created_at, :updated_at
+                )
+                """,
+                {
+                    "booking_id": booking_id,
+                    "notes": notes,
+                    "audio_path": audio_path,
+                    "transcript": transcript,
+                    "summary": summary,
+                    "created_at": now,
+                    "updated_at": now,
+                },
+            )
+
         conn.commit()
 
     return now

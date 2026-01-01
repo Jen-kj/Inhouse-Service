@@ -1,0 +1,63 @@
+﻿{% extends "base.html" %}
+{% set title = "Nota Space - Room Booking" %}
+
+{% block content %}
+<div class="page" data-page="room-booking">
+  <div class="page-header">
+    <div>
+      <div class="page-eyebrow">Nota Space</div>
+      <h1 class="page-title">Room Booking</h1>
+      <p class="page-subtitle">회의실 예약 현황을 한눈에 보고, 바로 예약하세요.</p>
+    </div>
+    <div class="ns-date">
+      <label for="ns-date" class="form-label">날짜</label>
+      <input id="ns-date" class="form-input" type="date" />
+    </div>
+  </div>
+
+  <div class="ns-layout">
+    <section class="ns-card">
+      <div class="ns-card-title">오늘의 예약 타임라인</div>
+      <div class="ns-timeline" id="ns-timeline"></div>
+    </section>
+
+    <section class="ns-card ns-form-card">
+      <div class="ns-card-title">예약 만들기</div>
+      <form id="ns-booking-form" class="form-stack">
+        <label class="form-label" for="ns-room">회의실</label>
+        <select id="ns-room" name="room_id" class="form-select" required></select>
+
+        <label class="form-label" for="ns-booking-date">날짜</label>
+        <input id="ns-booking-date" name="date" class="form-input" type="date" required />
+
+        <div class="ns-time-row">
+          <div>
+            <label class="form-label" for="ns-start">시작 시간</label>
+            <input id="ns-start" name="start_time" class="form-input" type="time" step="3600" required />
+          </div>
+          <div>
+            <label class="form-label" for="ns-end">종료 시간</label>
+            <input id="ns-end" name="end_time" class="form-input" type="time" step="3600" required />
+          </div>
+        </div>
+
+        <label class="form-label" for="ns-agenda">회의 아젠다</label>
+        <input id="ns-agenda" name="agenda" class="form-input" type="text" placeholder="회의 목적" required />
+
+        <label class="form-label" for="ns-presenter">발표자</label>
+        <input id="ns-presenter" name="presenter" class="form-input" type="text" placeholder="발표자 이름" required />
+
+        <label class="form-label" for="ns-participants">참여자</label>
+        <input id="ns-participants" name="participants" class="form-input" type="text" placeholder="이름을 콤마로 구분" required />
+
+        <div class="ns-form-actions">
+          <button class="btn ns-btn" type="submit">예약 등록</button>
+        </div>
+        <div class="ns-form-note" id="ns-booking-message"></div>
+      </form>
+    </section>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/nota_space.js') }}"></script>
+{% endblock %}

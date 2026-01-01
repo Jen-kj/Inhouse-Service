@@ -1,0 +1,180 @@
+﻿.ns-date {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ns-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.ns-card {
+  background: var(--app-card);
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.06);
+}
+
+.ns-form-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ns-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.ns-timeline {
+  overflow-x: auto;
+}
+
+.ns-timeline-grid {
+  display: grid;
+  gap: 6px;
+}
+
+.ns-timeline-row {
+  display: grid;
+  grid-template-columns: 180px repeat(10, minmax(70px, 1fr));
+  gap: 6px;
+}
+
+.ns-timeline-header {
+  font-size: 12px;
+  color: var(--app-muted);
+}
+
+.ns-room-col {
+  background: #f8fafc;
+  border: 1px solid var(--app-border);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.ns-room-name {
+  font-weight: 600;
+}
+
+.ns-room-meta {
+  font-size: 11px;
+  color: var(--app-muted);
+  margin-top: 4px;
+}
+
+.ns-hour-col {
+  background: #f8fafc;
+  border: 1px solid var(--app-border);
+  border-radius: 10px;
+  padding: 10px 6px;
+  text-align: center;
+}
+
+.ns-slot {
+  border: 1px dashed #d7dde5;
+  border-radius: 10px;
+  background: #ffffff;
+  min-height: 60px;
+  cursor: pointer;
+  padding: 8px;
+  text-align: left;
+}
+
+.ns-slot.is-booked {
+  border: 1px solid rgba(37, 99, 235, 0.4);
+  background: rgba(37, 99, 235, 0.08);
+  cursor: default;
+}
+
+.ns-booking-title {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ns-booking-meta {
+  font-size: 11px;
+  color: var(--app-muted);
+  margin-top: 4px;
+}
+
+.ns-time-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.ns-btn {
+  background: var(--app-accent);
+  color: #ffffff;
+}
+
+.ns-btn-light {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.ns-form-actions {
+  margin-top: 6px;
+}
+
+.ns-form-note {
+  font-size: 12px;
+  color: var(--app-muted);
+  min-height: 18px;
+}
+
+.ns-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ns-log-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+.ns-log-title {
+  font-weight: 600;
+}
+
+.ns-log-meta {
+  font-size: 12px;
+  color: var(--app-muted);
+  margin-top: 4px;
+}
+
+.ns-log-summary {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #334155;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 8px;
+  white-space: pre-line;
+}
+
+.ns-empty {
+  font-size: 12px;
+  color: var(--app-muted);
+}
+
+@media (max-width: 960px) {
+  .ns-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ns-timeline-row {
+    grid-template-columns: 140px repeat(10, minmax(60px, 1fr));
+  }
+}

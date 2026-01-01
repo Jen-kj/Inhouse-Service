@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ title or "Inhouse Service" }}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <script src="{{ url_for('static', filename='js/base.js') }}"></script>
 </head>
 <body>
   <div class="layout">
@@ -13,6 +14,13 @@
 
       <nav class="nav">
         <a class="nav-link {% if active == 'service-desk' %}is-active{% endif %}" href="/service-desk">Service Desk</a>
+        <div class="nav-group">
+          <a class="nav-link {% if active == 'nota-space' %}is-active{% endif %}" href="/nota-space">Nota Space</a>
+          <div class="nav-subnav {% if active == 'nota-space' %}is-open{% endif %}">
+            <a class="nav-sublink {% if subnav == 'room-booking' %}is-active{% endif %}" href="/nota-space/room-booking">Room Booking</a>
+            <a class="nav-sublink {% if subnav == 'meeting-log' %}is-active{% endif %}" href="/nota-space/meeting-log">Meeting Log</a>
+          </div>
+        </div>
       </nav>
 
       <div class="sidebar-footer">
@@ -29,26 +37,5 @@
     </main>
   </div>
 
-  <script>
-  (function () {
-    const el = document.getElementById("current-time");
-    if (!el) return;
-
-    const pad = (n) => String(n).padStart(2, "0");
-
-    function tick() {
-      const d = new Date();
-      const y = d.getFullYear();
-      const m = pad(d.getMonth() + 1);
-      const day = pad(d.getDate());
-      const hh = pad(d.getHours());
-      const mm = pad(d.getMinutes());
-      el.textContent = `현재: ${y}-${m}-${day} ${hh}:${mm}`;
-    }
-
-    tick();
-    setInterval(tick, 1000);
-  })();
-  </script>
 </body>
 </html>
