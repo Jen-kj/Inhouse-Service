@@ -94,21 +94,7 @@ def init_db():
             )
             """
         )
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS meeting_logs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                booking_id INTEGER NOT NULL UNIQUE,
-                notes TEXT,
-                audio_path TEXT,
-                transcript TEXT,
-                summary TEXT,
-                created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL,
-                FOREIGN KEY(booking_id) REFERENCES bookings(id)
-            )
-            """
-        )
+        _ensure_meeting_logs_schema(conn)
         conn.commit()
 
         room_count = conn.execute("SELECT COUNT(*) FROM rooms").fetchone()[0]
@@ -318,56 +304,50 @@ def update_ticket_status(ticket_id, status):
 
 def seed_rooms(conn):
     rooms = [
-        {
-            "name": "Disagree & Commit",
-            "feature": "Large meeting room (16+), intense discussions",
-            "recommended_use": "All-hands, seminars, heated debates",
-            "capacity": 16,
-            "room_type": "meeting",
-        },
-        {
-            "name": "Ownership",
-            "feature": "Round table, horizontal communication",
-            "recommended_use": "Brainstorming, hierarchy-free discussions",
-            "capacity": 8,
-            "room_type": "meeting",
-        },
-        {
-            "name": "Customer-Centric",
-            "feature": "Ping-pong table meeting room",
-            "recommended_use": "Customer-focused decisions, action items",
-            "capacity": 10,
-            "room_type": "meeting",
-        },
-        {
-            "name": "Trust",
-            "feature": "Smart window, external guests",
-            "recommended_use": "External meetings, confidential discussions",
-            "capacity": 6,
-            "room_type": "external",
-        },
-        {
-            "name": "Focus Room",
-            "feature": "Single-person focus room, cozy lighting",
-            "recommended_use": "Deep work, private calls",
-            "capacity": 1,
-            "room_type": "focus",
-        },
-        {
-            "name": "LP Rooms - Dive Deep",
-            "feature": "6-person room named after leadership principle",
-            "recommended_use": "General team meetings",
-            "capacity": 6,
-            "room_type": "meeting",
-        },
-        {
-            "name": "LP Rooms - Think Big",
-            "feature": "6-person room named after leadership principle",
-            "recommended_use": "General team meetings",
-            "capacity": 6,
-            "room_type": "meeting",
-        },
-    ]
+    {
+        "name": "Disagree & Commit",
+        "feature": "대회의실",
+        "recommended_use": "전사 미팅, 세미나, 격렬한 논의",
+        "capacity": 16,
+        "room_type": "meeting",
+    },
+    {
+        "name": "Ownership",
+        "feature": "원형 테이블",
+        "recommended_use": "아이디어 브레인스토밍, 직급 없는 토론",
+        "capacity": 8,
+        "room_type": "meeting",
+    },
+    {
+        "name": "Customer-Centric",
+        "feature": "탁구대 테이블",
+        "recommended_use": "고객 중심 의사결정, 액션 아이템 도출",
+        "capacity": 8,
+        "room_type": "meeting",
+    },
+    {
+        "name": "Trust",
+        "feature": "외부 미팅용",
+        "recommended_use": "외부 미팅, 보안이 필요한 논의",
+        "capacity": 6,
+        "room_type": "meeting",
+    },
+    {
+        "name": "Focus Room",
+        "feature": "1인 집중실",
+        "recommended_use": "딥 워크, 개인 통화",
+        "capacity": 1,
+        "room_type": "focus",
+    },
+    {
+        "name": "Coworking Space",
+        "feature": "We-yard 테이블",
+        "recommended_use": "모각코, 협업 작업, 자유로운 아이디어 논의",
+        "capacity": 12,
+        "room_type": "coworking",
+    },
+]
+
 
     conn.executemany(
         """
@@ -435,6 +415,36 @@ def fetch_bookings(date_value):
     return result
 
 
+def fetch_all_bookings():
+    with get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT b.*, r.name as room_name, r.room_type, r.feature, r.recommended_use, r.capacity
+            FROM bookings b
+            JOIN rooms r ON r.id = b.room_id
+            ORDER BY b.date DESC, b.start_time DESC
+            """
+        ).fetchall()
+
+    result = [dict(row) for row in rows]
+    return result
+
+
+def fetch_booking_days(month_value):
+    month_like = f"{month_value}-%"
+    with get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT date, COUNT(*) as count
+            FROM bookings
+            WHERE date LIKE :month
+            GROUP BY date
+            """,
+            {"month": month_like},
+        ).fetchall()
+    return {row["date"]: row["count"] for row in rows}
+
+
 def create_booking(data):
     now = _now_iso()
     with get_connection() as conn:
@@ -495,12 +505,210 @@ def has_booking_conflict(room_id, date_value, start_time, end_time):
 
 
 def upsert_meeting_log(booking_id, notes, audio_path, transcript, summary):
-    now = _now_iso()
+    return upsert_meeting_log_entry(
+        booking_id=booking_id,
+        notes=notes,
+        audio_path=audio_path,
+        transcript=transcript,
+        summary=summary,
+    )
+
+
+def _ensure_meeting_logs_schema(conn):
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS meeting_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            booking_id INTEGER UNIQUE,
+            notes TEXT,
+            audio_path TEXT,
+            transcript TEXT,
+            summary TEXT,
+            title TEXT,
+            author TEXT,
+            meeting_date TEXT,
+            start_time TEXT,
+            end_time TEXT,
+            room_name TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY(booking_id) REFERENCES bookings(id)
+        )
+        """
+    )
+
+    columns = [row["name"] for row in conn.execute("PRAGMA table_info(meeting_logs)").fetchall()]
+    required = {
+        "title",
+        "author",
+        "meeting_date",
+        "start_time",
+        "end_time",
+        "room_name",
+    }
+    if required.issubset(set(columns)):
+        return
+
+    conn.execute(
+        """
+        CREATE TABLE meeting_logs_new (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            booking_id INTEGER UNIQUE,
+            notes TEXT,
+            audio_path TEXT,
+            transcript TEXT,
+            summary TEXT,
+            title TEXT,
+            author TEXT,
+            meeting_date TEXT,
+            start_time TEXT,
+            end_time TEXT,
+            room_name TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY(booking_id) REFERENCES bookings(id)
+        )
+        """
+    )
+
+    conn.execute(
+        """
+        INSERT INTO meeting_logs_new (
+            id, booking_id, notes, audio_path, transcript, summary, created_at, updated_at
+        )
+        SELECT id, booking_id, notes, audio_path, transcript, summary, created_at, updated_at
+        FROM meeting_logs
+        """
+    )
+    conn.execute("DROP TABLE meeting_logs")
+    conn.execute("ALTER TABLE meeting_logs_new RENAME TO meeting_logs")
+
+
+def fetch_booking_by_id(booking_id):
     with get_connection() as conn:
-        existing = conn.execute(
-            "SELECT id FROM meeting_logs WHERE booking_id = :booking_id",
+        row = conn.execute(
+            """
+            SELECT b.*, r.name as room_name, r.room_type, r.feature, r.recommended_use, r.capacity
+            FROM bookings b
+            JOIN rooms r ON r.id = b.room_id
+            WHERE b.id = :booking_id
+            """,
             {"booking_id": booking_id},
         ).fetchone()
+
+        participants = conn.execute(
+            """
+            SELECT participant_name
+            FROM meeting_participants
+            WHERE booking_id = :booking_id
+            """,
+            {"booking_id": booking_id},
+        ).fetchall()
+
+        log = conn.execute(
+            """
+            SELECT id, summary, notes, audio_path, transcript
+            FROM meeting_logs
+            WHERE booking_id = :booking_id
+            """,
+            {"booking_id": booking_id},
+        ).fetchone()
+
+    if not row:
+        return None
+
+    result = dict(row)
+    result["participants"] = [p["participant_name"] for p in participants]
+    result["log"] = dict(log) if log else None
+    return result
+
+
+def fetch_meeting_logs():
+    with get_connection() as conn:
+        booking_rows = conn.execute(
+            """
+            SELECT
+                ml.id as log_id,
+                b.id as booking_id,
+                b.date as meeting_date,
+                b.start_time,
+                b.end_time,
+                r.name as room_name,
+                b.agenda as agenda,
+                b.presenter as presenter,
+                ml.summary as summary,
+                CASE WHEN ml.id IS NULL THEN 0 ELSE 1 END as has_log
+            FROM bookings b
+            JOIN rooms r ON r.id = b.room_id
+            LEFT JOIN meeting_logs ml ON ml.booking_id = b.id
+            """
+        ).fetchall()
+
+        direct_rows = conn.execute(
+            """
+            SELECT
+                ml.id as log_id,
+                NULL as booking_id,
+                ml.meeting_date,
+                ml.start_time,
+                ml.end_time,
+                ml.room_name,
+                ml.title as agenda,
+                ml.author as presenter,
+                ml.summary as summary,
+                1 as has_log
+            FROM meeting_logs ml
+            WHERE ml.booking_id IS NULL
+            """
+        ).fetchall()
+
+    combined = [dict(row) for row in booking_rows] + [dict(row) for row in direct_rows]
+    combined.sort(
+        key=lambda item: (
+            item.get("meeting_date") or "",
+            item.get("start_time") or "",
+        ),
+        reverse=True,
+    )
+    return combined
+
+
+def fetch_meeting_log_by_id(log_id):
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT id, booking_id, title, author, meeting_date, start_time, end_time, room_name,
+                   notes, audio_path, transcript, summary, created_at, updated_at
+            FROM meeting_logs
+            WHERE id = :log_id
+            """,
+            {"log_id": log_id},
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def upsert_meeting_log_entry(
+    booking_id,
+    notes,
+    audio_path,
+    transcript,
+    summary,
+    title=None,
+    author=None,
+    meeting_date=None,
+    start_time=None,
+    end_time=None,
+    room_name=None,
+):
+    now = _now_iso()
+    with get_connection() as conn:
+        if booking_id is not None:
+            existing = conn.execute(
+                "SELECT id FROM meeting_logs WHERE booking_id = :booking_id",
+                {"booking_id": booking_id},
+            ).fetchone()
+        else:
+            existing = None
 
         if existing:
             conn.execute(
@@ -526,9 +734,13 @@ def upsert_meeting_log(booking_id, notes, audio_path, transcript, summary):
             conn.execute(
                 """
                 INSERT INTO meeting_logs (
-                    booking_id, notes, audio_path, transcript, summary, created_at, updated_at
+                    booking_id, notes, audio_path, transcript, summary,
+                    title, author, meeting_date, start_time, end_time, room_name,
+                    created_at, updated_at
                 ) VALUES (
-                    :booking_id, :notes, :audio_path, :transcript, :summary, :created_at, :updated_at
+                    :booking_id, :notes, :audio_path, :transcript, :summary,
+                    :title, :author, :meeting_date, :start_time, :end_time, :room_name,
+                    :created_at, :updated_at
                 )
                 """,
                 {
@@ -537,6 +749,12 @@ def upsert_meeting_log(booking_id, notes, audio_path, transcript, summary):
                     "audio_path": audio_path,
                     "transcript": transcript,
                     "summary": summary,
+                    "title": title,
+                    "author": author,
+                    "meeting_date": meeting_date,
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "room_name": room_name,
                     "created_at": now,
                     "updated_at": now,
                 },

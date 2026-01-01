@@ -102,8 +102,29 @@ body {
   cursor: pointer;
 }
 
+.ns-modal-close {
+  background: transparent !important;
+  color: #6b7280;          /* 기존 회색 */
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.ns-modal-close:hover {
+  color: #111827;
+}
+
+.ns-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
 .form-stack {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
+

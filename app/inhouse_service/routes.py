@@ -14,12 +14,17 @@ from app.db import (
     URGENCY_OPTIONS,
     create_booking,
     create_ticket,
+    fetch_booking_by_id,
+    fetch_all_bookings,
+    fetch_meeting_log_by_id,
     fetch_bookings,
+    fetch_booking_days,
+    fetch_meeting_logs,
     fetch_rooms,
     fetch_summary,
     fetch_tickets,
     has_booking_conflict,
-    upsert_meeting_log,
+    upsert_meeting_log_entry,
     update_ticket_status,
 )
 
@@ -73,16 +78,14 @@ def _summarize_text(text):
         from transformers import pipeline
 
         if _SUMMARY_PIPELINE is None:
-            _SUMMARY_PIPELINE = pipeline("text2text-generation", model="google/flan-t5-small")
-        prompt = (
-            "Summarize the following meeting notes into:\n"
-            "1. Key discussion points\n"
-            "2. Decisions made\n"
-            "3. Action items\n\n"
-            f"Notes:\n{text}"
-        )
-        output = _SUMMARY_PIPELINE(prompt, max_length=256, min_length=80, do_sample=False)
-        return (output[0].get("generated_text") or "").strip()
+            _SUMMARY_PIPELINE = pipeline("summarization", model="facebook/bart-large-cnn")
+
+        cleaned = " ".join(text.split())
+        if len(cleaned) > 4000:
+            cleaned = cleaned[:4000]
+
+        output = _SUMMARY_PIPELINE(cleaned, max_length=140, min_length=40, do_sample=False)
+        return (output[0].get("summary_text") or "").strip()
     except Exception:
         return "AI summary unavailable."
 
@@ -107,9 +110,47 @@ def nota_space_room_booking():
     return render_template("nota_space_room_booking.html", active="nota-space", subnav="room-booking")
 
 
+@bp.get("/nota-space/room-booking/list")
+def nota_space_room_booking_list():
+    return render_template("nota_space_booking_list.html", active="nota-space", subnav="room-booking")
+
+
 @bp.get("/nota-space/meeting-log")
 def nota_space_meeting_log():
     return render_template("nota_space_meeting_log.html", active="nota-space", subnav="meeting-log")
+
+
+@bp.get("/nota-space/meeting-log/new")
+def nota_space_meeting_log_new():
+    return render_template(
+        "nota_space_meeting_log_form.html",
+        active="nota-space",
+        subnav="meeting-log",
+        booking_id=None,
+        log_id=None,
+    )
+
+
+@bp.get("/nota-space/meeting-log/<int:booking_id>")
+def nota_space_meeting_log_for_booking(booking_id):
+    return render_template(
+        "nota_space_meeting_log_form.html",
+        active="nota-space",
+        subnav="meeting-log",
+        booking_id=booking_id,
+        log_id=None,
+    )
+
+
+@bp.get("/nota-space/meeting-log/entry/<int:log_id>")
+def nota_space_meeting_log_entry(log_id):
+    return render_template(
+        "nota_space_meeting_log_form.html",
+        active="nota-space",
+        subnav="meeting-log",
+        booking_id=None,
+        log_id=log_id,
+    )
 
 
 @bp.get("/api/service-desk/summary")
@@ -181,11 +222,53 @@ def nota_space_rooms():
 
 @bp.get("/api/nota-space/bookings")
 def nota_space_bookings():
+    if request.args.get("all"):
+        return jsonify({"bookings": fetch_all_bookings()})
+
+    month_value = request.args.get("month")
+    if month_value:
+        return jsonify({"month": month_value, "days": fetch_booking_days(month_value)})
+
     date_value = request.args.get("date")
     if not date_value:
         date_value = datetime.now().strftime("%Y-%m-%d")
 
     return jsonify({"date": date_value, "bookings": fetch_bookings(date_value)})
+
+
+@bp.get("/api/nota-space/bookings/<int:booking_id>")
+def nota_space_booking_detail(booking_id):
+    booking = fetch_booking_by_id(booking_id)
+    if not booking:
+        return jsonify({"error": "Booking not found"}), 404
+    return jsonify({"booking": booking})
+
+
+@bp.get("/api/nota-space/meeting-logs")
+def nota_space_meeting_logs():
+    logs = fetch_meeting_logs()
+    return jsonify({"logs": logs})
+
+
+@bp.get("/api/nota-space/meeting-logs/<int:log_id>")
+def nota_space_meeting_log_detail(log_id):
+    log = fetch_meeting_log_by_id(log_id)
+    if not log:
+        return jsonify({"error": "Meeting log not found"}), 404
+    return jsonify({"log": log})
+
+
+@bp.post("/nota-space/meeting-summary")
+def nota_space_meeting_summary():
+    payload = request.get_json(silent=True) or {}
+    meeting_text = (payload.get("meeting_text") or "").strip()
+    if not meeting_text:
+        return jsonify({"error": "회의 내용을 입력하세요."}), 400
+    if len(meeting_text) < 20:
+        return jsonify({"error": "회의 내용이 너무 짧습니다."}), 400
+
+    summary = _summarize_text(meeting_text)
+    return jsonify({"summary_text": summary})
 
 
 @bp.post("/api/nota-space/bookings")
@@ -233,36 +316,45 @@ def create_nota_space_booking():
 def create_nota_space_meeting_log():
     booking_id = request.form.get("booking_id")
     notes = (request.form.get("notes") or "").strip()
-    audio_file = request.files.get("audio")
+    title = (request.form.get("title") or "").strip()
+    author = (request.form.get("author") or "").strip()
+    meeting_date = request.form.get("meeting_date") or None
+    start_time = request.form.get("start_time") or None
+    end_time = request.form.get("end_time") or None
+    room_name = (request.form.get("room_name") or "").strip() or None
+    summary = (request.form.get("summary") or "").strip()
 
-    if not booking_id:
-        return jsonify({"error": "booking_id is required"}), 400
+    if not booking_id and not title:
+        return jsonify({"error": "Title is required for non-booking logs"}), 400
+    if not booking_id and not author:
+        return jsonify({"error": "Author is required for non-booking logs"}), 400
+    if not notes:
+        return jsonify({"error": "회의 내용을 입력하세요."}), 400
 
-    if not notes and not (audio_file and audio_file.filename):
-        return jsonify({"error": "Audio or notes required"}), 400
+    booking_id_value = None
+    if booking_id:
+        try:
+            booking_id_value = int(booking_id)
+        except ValueError:
+            return jsonify({"error": "Invalid booking id"}), 400
+        if not fetch_booking_by_id(booking_id_value):
+            return jsonify({"error": "Booking not found"}), 404
 
-    try:
-        booking_id_value = int(booking_id)
-    except ValueError:
-        return jsonify({"error": "Invalid booking id"}), 400
+    if not summary:
+        summary = _summarize_text(notes)
 
-    audio_path = None
-    transcript = ""
-    if audio_file and audio_file.filename:
-        audio_path = _save_upload(audio_file, "nota_space")
-        if audio_path:
-            absolute_audio = os.path.join(BASE_DIR, "app", audio_path.lstrip("/"))
-            transcript = _transcribe_audio(absolute_audio)
-
-    combined_text = "\n".join([text for text in [notes, transcript] if text])
-    summary = _summarize_text(combined_text) if combined_text else "AI summary unavailable."
-
-    updated_at = upsert_meeting_log(
+    updated_at = upsert_meeting_log_entry(
         booking_id_value,
         notes or None,
-        audio_path,
-        transcript or None,
+        None,
+        None,
         summary or None,
+        title=title or None,
+        author=author or None,
+        meeting_date=meeting_date,
+        start_time=start_time,
+        end_time=end_time,
+        room_name=room_name,
     )
 
     return jsonify({"booking_id": booking_id_value, "summary": summary, "updated_at": updated_at}), 201

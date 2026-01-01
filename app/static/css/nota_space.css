@@ -1,13 +1,24 @@
-﻿.ns-date {
+.ns-date {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  gap: 10px;
+}
+
+.ns-date .form-label {
+  margin: 0;
 }
 
 .ns-layout {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
+}
+
+.ns-header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
 }
 
 .ns-card {
@@ -24,82 +35,353 @@
   gap: 12px;
 }
 
+.ns-form-section {
+  background: #f8fafc;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ns-title-section {
+  background: #ffffff;
+  border: none;
+  padding: 0;
+}
+
+.ns-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
 .ns-card-title {
   font-size: 15px;
   font-weight: 700;
   margin-bottom: 10px;
 }
 
+.ns-meeting-title {
+  font-size: 26px;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: #111827;
+  width: 100%;
+}
+
+.ns-meeting-title::placeholder {
+  color: #94a3b8;
+}
+
+.ns-meeting-title.is-readonly {
+  cursor: default;
+}
+
+.ns-meeting-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px 24px;
+}
+
+.ns-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: #1e293b;
+}
+
+.ns-meta-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--app-muted);
+}
+
+.ns-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.ns-card-header .ns-card-title {
+  margin-bottom: 0;
+}
+
+.ns-view-tabs {
+  display: inline-flex;
+  gap: 6px;
+  background: #eef2f7;
+  padding: 4px;
+  border-radius: 999px;
+}
+
+.ns-view-btn {
+  border: none;
+  background: transparent;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.ns-view-btn.is-active {
+  background: #ffffff;
+  color: #1f2937;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+.ns-view.is-hidden {
+  display: none;
+}
+
+.ns-daily-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
 .ns-timeline {
-  overflow-x: auto;
+  overflow: visible;
+}
+
+.ns-legend {
+  display: flex;
+  gap: 14px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--app-muted);
+}
+
+.ns-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ns-legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1px solid #d7dde5;
+  background: #ffffff;
+}
+
+.ns-legend-swatch.is-booked {
+  border-color: #06b6d4;
+  background: #06b6d4;
+}
+
+.ns-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(80px, 1fr));
+  gap: 8px;
+}
+
+.ns-calendar-header {
+  font-size: 12px;
+  color: var(--app-muted);
+  text-align: center;
+  padding-bottom: 6px;
+}
+
+.ns-cal-cell {
+  min-height: 72px;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 8px;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+}
+
+.ns-cal-cell.is-booked {
+  border-color: rgba(37, 99, 235, 0.5);
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.ns-cal-cell.is-selected {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.ns-cal-day {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ns-cal-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.ns-cal-empty {
+  border: none;
+  background: transparent;
 }
 
 .ns-timeline-grid {
   display: grid;
-  gap: 6px;
+  gap: 0;
+  width: 100%;
+  border:none;
+  border-radius: 6px;
+  background: #ffffff;
 }
+
+
 
 .ns-timeline-row {
   display: grid;
-  grid-template-columns: 180px repeat(10, minmax(70px, 1fr));
-  gap: 6px;
+  grid-template-columns: 220px repeat(10, minmax(0, 1fr));
+  gap: 0;
 }
 
 .ns-timeline-header {
   font-size: 12px;
-  color: var(--app-muted);
+  color: #64748b;
+  background: #f8fafc;
+  font-weight: 700;
 }
 
 .ns-room-col {
-  background: #f8fafc;
-  border: 1px solid var(--app-border);
-  border-radius: 10px;
-  padding: 10px;
+  border-right: none;
+  border-bottom: none;
+  border-top: 1px solid #eef2f7;
+  border-left: 1px solid #eef2f7;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+}
+
+.ns-room-head {
+  justify-content: center;
+  font-weight: 700;
 }
 
 .ns-room-name {
   font-weight: 600;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #111827;
 }
 
-.ns-room-meta {
+.ns-room-tooltip {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  background: #0f172a;
+  color: #ffffff;
+  padding: 8px 10px;
+  border-radius: 8px;
   font-size: 11px;
-  color: var(--app-muted);
-  margin-top: 4px;
+  white-space: pre-line;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 8;
+  max-width: 220px;
+}
+
+.ns-room-name:hover .ns-room-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ns-room-info {
+  font-size: 12px;
+  color: #64748b;
+  display: inline-flex;
+}
+
+.ns-room-tooltip.is-flip {
+  top: auto;
+  bottom: calc(100% + 6px);
+  transform: translateY(4px);
+}
+
+.ns-room-name:hover .ns-room-tooltip.is-flip {
+  transform: translateY(0);
 }
 
 .ns-hour-col {
-  background: #f8fafc;
-  border: 1px solid var(--app-border);
-  border-radius: 10px;
-  padding: 10px 6px;
+  border-right: none;
+  border-bottom: none;
+  border-top: 1px solid #eef2f7;
+  border-left: 1px solid #eef2f7;
+  padding: 12px 6px;
   text-align: center;
-}
-
-.ns-slot {
-  border: 1px dashed #d7dde5;
-  border-radius: 10px;
-  background: #ffffff;
-  min-height: 60px;
-  cursor: pointer;
-  padding: 8px;
-  text-align: left;
-}
-
-.ns-slot.is-booked {
-  border: 1px solid rgba(37, 99, 235, 0.4);
-  background: rgba(37, 99, 235, 0.08);
-  cursor: default;
-}
-
-.ns-booking-title {
-  font-size: 12px;
+  color: #64748b;
   font-weight: 600;
 }
 
-.ns-booking-meta {
-  font-size: 11px;
-  color: var(--app-muted);
-  margin-top: 4px;
+.ns-slot {
+  border: none;
+  border-top: 1px solid #eef2f7;
+  border-left: 1px solid #eef2f7;
+  background: #ffffff;
+  min-height: 50px;
+  cursor: pointer;
+  padding: 8px;
+  text-align: center;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* reset button native chrome/safari default outline/border */
+.ns-slot,
+.ns-slot:focus {
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  box-shadow: none;
+}
+
+/* Remove top border on the first timeline row (prevents extra line at very top) */
+.ns-timeline-row:first-child .ns-room-col,
+.ns-timeline-row:first-child .ns-hour-col,
+.ns-timeline-row:first-child .ns-slot {
+  border-top: none;
+}
+
+/* Remove left border on the first cell of each row to avoid double line at row start */
+.ns-timeline-row > :first-child {
+  border-left: none;
+}
+
+.ns-slot.is-booked {
+  border-right: 1px solid #eef2f7;
+  border-bottom: 1px solid #eef2f7;
+  background: #06b6d4;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: default;
+}
+
+.ns-slot.is-available:hover {
+  background: #f8fafc;
 }
 
 .ns-time-row {
@@ -109,13 +391,25 @@
 }
 
 .ns-btn {
-  background: var(--app-accent);
+  background: #06b6d4;
   color: #ffffff;
+  text-decoration: none;
 }
 
 .ns-btn-light {
-  background: #e2e8f0;
-  color: #1e293b;
+  background: #06b6d4;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.ns-btn:hover,
+.ns-btn-light:hover {
+  background: #0891b2;
+}
+
+.ns-btn:active,
+.ns-btn-light:active {
+  background: #0e7490;
 }
 
 .ns-form-actions {
@@ -126,6 +420,196 @@
   font-size: 12px;
   color: var(--app-muted);
   min-height: 18px;
+}
+
+.ns-ai-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.ns-summary-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.ns-summary-text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #1f2937;
+  white-space: pre-line;
+}
+
+.ns-notes-input {
+  min-height: 220px;
+  line-height: 1.7;
+  resize: vertical;
+}
+
+.ns-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 60;
+}
+
+.ns-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.98);
+  width: min(480px, 92vw);
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid var(--app-border);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
+  padding: 18px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 70;
+}
+
+.ns-modal.is-open,
+.ns-modal-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ns-modal.is-open {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.ns-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.ns-modal-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.ns-modal-subtitle {
+  font-size: 12px;
+  color: var(--app-muted);
+  margin-top: 4px;
+}
+
+/* .ns-modal-close {
+  border: none;
+  background: #06b6d4;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+} */
+
+.ns-modal-close {
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  font-size: 18px;
+}
+
+.ns-modal-close:hover {
+  color: #111827;
+}
+
+
+body.ns-modal-open {
+  overflow: hidden;
+}
+
+.ns-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ns-log-table {
+  display: grid;
+  gap: 8px;
+}
+
+.ns-log-row {
+  display: grid;
+  grid-template-columns: 110px 140px 160px 1fr 120px 120px;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--app-border);
+  font-size: 13px;
+}
+
+.ns-log-header {
+  font-weight: 600;
+  color: var(--app-muted);
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.ns-link {
+  color: var(--app-accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.ns-booking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ns-booking-table {
+  display: grid;
+  gap: 8px;
+}
+
+.ns-booking-row {
+  display: grid;
+  grid-template-columns: 110px 140px 160px 1fr 120px 120px;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--app-border);
+  font-size: 13px;
+}
+
+.ns-booking-header {
+  font-weight: 600;
+  color: var(--app-muted);
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.ns-booking-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+.ns-booking-summary {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid var(--app-border);
+}
+
+.ns-my-bookings {
+  margin-top: 16px;
 }
 
 .ns-log-list {
@@ -178,3 +662,4 @@
     grid-template-columns: 140px repeat(10, minmax(60px, 1fr));
   }
 }
+

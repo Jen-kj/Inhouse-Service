@@ -1,0 +1,100 @@
+﻿{% extends "base.html" %}
+{% set title = "Nota Space - 회의록 작성" %}
+
+{% block content %}
+<div class="page" data-page="meeting-log-form" data-booking-id="{{ booking_id or '' }}" data-log-id="{{ log_id or '' }}">
+  <div class="page-header">
+    <div>
+      <div class="page-eyebrow">Nota Space</div>
+      <h1 class="page-title">회의록 작성</h1>
+      <p class="page-subtitle">회의록을 작성하고 AI 기반 자동 요약을 생성하세요.</p>
+    </div>
+    <div class="ns-actions">
+      <a class="btn ns-btn-light" href="/nota-space/meeting-log">목록으로</a>
+    </div>
+  </div>
+
+  <section class="ns-card ns-form-card">
+    <form id="ns-log-form" class="form-stack">
+      <input type="hidden" id="ns-log-booking" name="booking_id" value="{{ booking_id or '' }}" />
+      <input type="hidden" id="ns-summary-input" name="summary" value="" />
+
+      <div class="ns-form-section ns-title-section">
+        <input id="ns-meeting-title" name="title" class="ns-meeting-title" type="text" placeholder="회의 제목을 입력하세요" />
+      </div>
+
+      <div class="ns-form-section">
+        <div class="ns-section-title">회의 정보</div>
+        <div class="ns-meeting-meta">
+          <div class="ns-meta-item">
+            <span class="ns-meta-label">회의실</span>
+            <span id="ns-meta-room">-</span>
+          </div>
+          <div class="ns-meta-item">
+            <span class="ns-meta-label">날짜</span>
+            <span id="ns-meta-date">-</span>
+          </div>
+          <div class="ns-meta-item">
+            <span class="ns-meta-label">시간</span>
+            <span id="ns-meta-time">-</span>
+          </div>
+          <div class="ns-meta-item">
+            <span class="ns-meta-label">발제자</span>
+            <span id="ns-meta-presenter">-</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ns-form-section ns-direct-fields" id="ns-direct-fields">
+        <div class="ns-section-title">회의 정보 입력 (선택)</div>
+        <label class="form-label" for="ns-log-author">발제자</label>
+        <input id="ns-log-author" name="author" class="form-input" type="text" placeholder="발제자 이름" />
+
+        <div class="ns-time-row">
+          <div>
+            <label class="form-label" for="ns-log-date">날짜</label>
+            <input id="ns-log-date" name="meeting_date" class="form-input" type="date" />
+          </div>
+          <div>
+            <label class="form-label" for="ns-log-room">회의실</label>
+            <input id="ns-log-room" name="room_name" class="form-input" type="text" placeholder="회의실명 (선택)" />
+          </div>
+        </div>
+
+        <div class="ns-time-row">
+          <div>
+            <label class="form-label" for="ns-log-start">시작 시간</label>
+            <input id="ns-log-start" name="start_time" class="form-input" type="time" step="60" />
+          </div>
+          <div>
+            <label class="form-label" for="ns-log-end">종료 시간</label>
+            <input id="ns-log-end" name="end_time" class="form-input" type="time" step="60" />
+          </div>
+        </div>
+      </div>
+
+      <div class="ns-form-section ns-notes-section">
+        <div class="ns-section-title">Meeting Notes</div>
+        <textarea id="ns-notes" name="notes" class="form-textarea ns-notes-input" rows="12" placeholder="회의 내용을 입력하세요..."></textarea>
+
+        <div class="ns-ai-actions">
+          <button class="btn ns-btn-light" id="ns-generate-summary" type="button">Generate AI Summary</button>
+        </div>
+        <div class="ns-form-note" id="ns-summary-message"></div>
+
+        <div class="ns-summary-section" id="ns-summary-section">
+          <div class="ns-card-title">AI 요약 결과</div>
+          <div class="ns-summary-text" id="ns-summary-text">요약 결과가 없습니다.</div>
+        </div>
+      </div>
+
+      <div class="ns-form-actions">
+        <button class="btn ns-btn" type="submit">저장하기</button>
+      </div>
+      <div class="ns-form-note" id="ns-log-message"></div>
+    </form>
+  </section>
+</div>
+
+<script src="{{ url_for('static', filename='js/nota_space.js') }}"></script>
+{% endblock %}
