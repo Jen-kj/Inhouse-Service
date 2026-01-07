@@ -53,6 +53,13 @@
   flex-wrap: wrap;
 }
 
+.club-toggle--inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
 .club-tab-btn {
   border: 1px solid var(--club-line);
   background: #fff;
@@ -288,18 +295,21 @@
   gap: 6px;
   color: var(--club-muted);
   font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .club-card-actions {
   display: flex;
   gap: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  margin-left: auto;
 }
 
 .club-card-actions button {
-  border-radius: 999px;
-  padding: 8px 18px;
-  min-width: 110px;
+  border-radius: 12px;
+  padding: 10px 18px;
+  min-width: 140px;
   font-weight: 600;
 }
 
@@ -367,6 +377,11 @@
   background: #fff;
   display: grid;
   gap: 10px;
+}
+
+.club-event-meta {
+  color: var(--club-muted);
+  font-size: 0.9rem;
 }
 
 .club-rsvp {
@@ -675,12 +690,16 @@
   color: #fff;
 }
 
+/* 기존 .club-panel-body 덮어쓰기 */
 .club-panel-body {
-  padding: 32px;
+  padding: 24px;
   overflow-y: auto;
-  display: grid;
+
+  display: flex;
+  flex-direction: column;
   gap: 20px;
 }
+
 
 .club-info-grid {
   display: grid;
@@ -854,6 +873,56 @@
   gap: 20px;
 }
 
+.club-panel-section[hidden] {
+  display: none;
+}
+
+.club-panel-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.club-panel-section[data-panel-section="events"] .club-event {
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.club-panel-section[data-panel-section="events"] .club-rsvp {
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.club-panel-section[data-panel-section="events"] .club-rsvp .btn {
+  padding: 8px 12px;
+  border-radius: 999px;
+  min-width: 68px;
+}
+
+.club-panel-section[data-panel-section="events"] .club-event-main {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.club-panel-section[data-panel-section="events"] .club-event-main strong {
+  font-size: 1rem;
+}
+
+.club-panel-section[data-panel-section="events"] .club-event-meta {
+  font-size: 0.85rem;
+}
+
+.club-panel-section[data-panel-section="events"] {
+  gap: 12px;
+}
+
+.club-panel-section[data-panel-section="events"] .club-list {
+  gap: 10px;
+}
+
 
 
 .club-admin-body section {
@@ -864,6 +933,10 @@
   border-radius: 16px;
   background: #fff;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.club-admin-body section[hidden] {
+  display: none;
 }
 
 .club-form--modal label span {

@@ -113,10 +113,7 @@
   ],
   rsvps: {},
   pendingClubRequests: [],
-  expenses: [
-    { id: "exp-1", clubName: "탁구", title: "공간 대여", note: "정산 예정" },
-    { id: "exp-2", clubName: "보드게임", title: "소모품", note: "집계 중" }
-  ],
+  expenses: [],
   posts: {
     "탁구": [
       { id: "post-tt-1", type: "공지", title: "이번 주 실내 공간 공유" },
@@ -178,6 +175,7 @@ const refs = {
   adminPanels: Array.from(document.querySelectorAll("[data-admin-panel]")),
   joinApprovals: document.getElementById("club-join-approvals"),
   createApprovals: document.getElementById("club-create-approvals"),
+  budgetMonth: document.getElementById("club-budget-month"),
   budgetClub: document.getElementById("club-budget-club"),
   budgetSummary: document.getElementById("club-budget-summary"),
   expenseList: document.getElementById("club-expense-list"),
@@ -197,8 +195,6 @@ const refs = {
   detailPosts: document.getElementById("club-detail-posts"),
   detailEvents: document.getElementById("club-detail-events"),
   detailRequests: document.getElementById("club-detail-requests"),
-  healthWidget: document.getElementById("club-health"),
-  healthCta: document.getElementById("club-health-cta"),
   modal: document.getElementById("club-modal"),
   modalTitle: document.getElementById("club-modal-title"),
   modalContent: document.getElementById("club-modal-content"),
@@ -307,6 +303,17 @@ function buildEvents() {
       description: "주제에 맞춰 같이 그립니다."
     }
   ];
+
+  const monthKey = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  const thisMonth = monthKey(base);
+  const prevMonthDate = new Date(base.getFullYear(), base.getMonth() - 1, 1);
+  const prevMonth = monthKey(prevMonthDate);
+
+  store.expenses = [
+    { id: "exp-1", clubName: "탁구", month: thisMonth, title: "공간 대여", amount: 80000, note: "정산 예정" },
+    { id: "exp-2", clubName: "보드게임", month: thisMonth, title: "소모품", amount: 25000, note: "집계 중" },
+    { id: "exp-3", clubName: "탁구", month: prevMonth, title: "셔틀콕/볼", amount: 15000, note: "" }
+  ];
 }
 function setActiveTab(tab) {
   store.ui.activeTab = tab;
@@ -397,7 +404,6 @@ function renderClubCards(list, options = {}) {
           <div class="club-card-footer">
             <div class="club-member">👥 ${club.memberHint || "활동 중"}</div>
             <div class="club-card-actions">
-              <button class="btn club-btn-outline" data-action="detail" type="button">상세보기</button>
               ${showJoin
                 ? '<button class="btn club-btn-primary" data-action="join" type="button">가입 신청</button>'
                 : '<button class="btn club-btn-primary" data-action="join" type="button">가입 신청</button>'
@@ -550,6 +556,11 @@ function renderAdmin() {
   refs.adminLocked.hidden = store.isAdmin;
   refs.adminPanel.hidden = !store.isAdmin;
 
+  const availableTabs = new Set(refs.adminTabButtons.map((btn) => btn.dataset.adminTab).filter(Boolean));
+  if (!availableTabs.has(store.ui.adminTab)) {
+    store.ui.adminTab = refs.adminTabButtons[0]?.dataset.adminTab || "approvals";
+  }
+
   refs.adminTabButtons.forEach((btn) => {
     btn.classList.toggle("is-active", btn.dataset.adminTab === store.ui.adminTab);
   });
@@ -594,19 +605,45 @@ function renderAdmin() {
     : '<div class="club-empty">새로운 개설 신청이 없습니다.</div>';
 
   const clubOptions = store.clubs.map((club) => `<option value="${club.name}">${club.name}</option>`).join("");
-  refs.budgetClub.innerHTML = clubOptions;
   refs.postsClub.innerHTML = clubOptions;
 
-  const selectedBudget = refs.budgetClub.value || store.clubs[0]?.name;
-  refs.budgetSummary.innerHTML = `
-    <div class="club-summary-card">사용액: 집계 예정</div>
-    <div class="club-summary-card">잔액: 정산 예정</div>
-  `;
+  if (refs.budgetClub) {
+    refs.budgetClub.innerHTML = clubOptions;
+  }
 
-  refs.expenseList.innerHTML = store.expenses
-    .filter((exp) => exp.clubName === selectedBudget)
-    .map((exp) => `<div class="club-pill">${exp.title} - ${exp.note}</div>`)
-    .join("") || '<div class="club-empty">지출 내역이 없습니다.</div>';
+  if (refs.budgetMonth) {
+    const months = Array.from(new Set(store.expenses.map((exp) => exp.month).filter(Boolean))).sort().reverse();
+    const monthOptions = months.length ? months : [toISO(new Date()).slice(0, 7)];
+    refs.budgetMonth.innerHTML = monthOptions.map((m) => `<option value="${m}">${m}</option>`).join("");
+  }
+
+  if (store.ui.adminTab === "budget" && refs.budgetClub && refs.budgetMonth) {
+    const selectedClub = refs.budgetClub.value || store.clubs[0]?.name;
+    const selectedMonth = refs.budgetMonth.value;
+    const expenses = store.expenses.filter(
+      (exp) => exp.clubName === selectedClub && (!selectedMonth || exp.month === selectedMonth)
+    );
+    const total = expenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
+
+    if (refs.budgetSummary) {
+      refs.budgetSummary.innerHTML = `
+        <div class="club-summary-card">지출 건수: ${expenses.length}건</div>
+        <div class="club-summary-card">총 지출: ${total.toLocaleString()}원</div>
+      `;
+    }
+
+    if (refs.expenseList) {
+      refs.expenseList.innerHTML = expenses.length
+        ? expenses
+            .map(
+              (exp) =>
+                `<div class="club-pill">${exp.title} · ${Number(exp.amount || 0).toLocaleString()}원` +
+                `${exp.note ? ` · ${exp.note}` : ""}</div>`
+            )
+            .join("")
+        : '<div class="club-empty">지출 내역이 없습니다.</div>';
+    }
+  }
 
   const selectedPosts = refs.postsClub.value || store.clubs[0]?.name;
   const posts = store.posts[selectedPosts] || [];
@@ -629,6 +666,11 @@ function renderAdmin() {
 
 function renderDetail() {
   const club = selectedClub;
+  const availableTabs = new Set(refs.panelTabs.map((tab) => tab.dataset.panelTab).filter(Boolean));
+  if (!availableTabs.has(store.ui.detailTab)) {
+    store.ui.detailTab = "overview";
+  }
+
   refs.detailTitle.textContent = club.name;
   refs.detailCategory.textContent = club.category;
   refs.detailCategory.classList.remove("club-badge--sport", "club-badge--hobby");
@@ -641,17 +683,12 @@ function renderDetail() {
   refs.panelTabs.forEach((tab) => {
     const isActive = tab.dataset.panelTab === store.ui.detailTab;
     tab.classList.toggle("is-active", isActive);
-    if (tab.dataset.panelTab === "budget") {
-      tab.hidden = !store.isAdmin;
-    }
   });
 
   refs.panelSections.forEach((section) => {
     section.hidden = section.dataset.panelSection !== store.ui.detailTab;
   });
 
-  const isSports = club.category === "운동/건강";
-  refs.healthWidget.hidden = !isSports;
   refs.detailRequests.hidden = !(store.isAdmin && club.joinPolicy === "승인 필요");
 
   const posts = (store.posts[club.name] || []).slice(0, 3);
@@ -667,13 +704,16 @@ function renderDetail() {
 
 function renderEventItem(event, includeRsvp) {
   const status = store.rsvps[event.id] || "";
+  const meta = [event.startDate, event.time, event.clubName].filter(Boolean).join(" · ");
   return `
     <div class="club-event" data-event-id="${event.id}">
-      <div><strong>${event.title}</strong></div>
-      <div>${event.startDate} · ${event.time || ""} · ${event.clubName}</div>
+      <div class="club-event-main">
+        <div><strong>${event.title}</strong></div>
+        <div class="club-event-meta">${meta}</div>
+      </div>
       ${includeRsvp ? `
         <div class="club-rsvp">
-          ${["참여", "대기", "불참"].map((label) => `
+          ${["참여", "불참"].map((label) => `
             <button class="btn club-btn-outline ${status === label ? "is-active" : ""}" data-rsvp="${label}" type="button">${label}</button>
           `).join("")}
         </div>
@@ -806,15 +846,6 @@ function openEventModal(event) {
         }
       },
       {
-        label: "대기",
-        className: "club-btn-outline",
-        onClick: () => {
-          store.rsvps[event.id] = "대기";
-          showToast("RSVP: 대기");
-          render();
-        }
-      },
-      {
         label: "불참",
         className: "club-btn-outline",
         onClick: () => {
@@ -921,13 +952,13 @@ function init() {
     const club = store.clubs.find((item) => item.name === card.dataset.club);
     if (!club) return;
 
-    if (event.target.dataset.action === "detail") {
-      openPanel(club);
-    }
     if (event.target.dataset.action === "join") {
       const msg = club.joinPolicy === "바로 가입" ? "가입 완료" : "가입 요청 완료";
       showToast(msg);
+      return;
     }
+
+    openPanel(club);
   });
 
   refs.myList.addEventListener("click", (event) => {
@@ -1055,33 +1086,42 @@ function init() {
     }
   });
 
-  refs.expenseAdd.addEventListener("click", () => {
-    openModal({
-      title: "지출 추가",
-      content: '<input id="club-expense-title" type="text" placeholder="항목" style="width:100%;margin-bottom:8px;" />' +
-        '<input id="club-expense-note" type="text" placeholder="메모" style="width:100%" />',
-      actions: [
-        {
-          label: "저장",
-          className: "club-btn-primary",
-          onClick: () => {
-            const title = document.getElementById("club-expense-title").value.trim();
-            const note = document.getElementById("club-expense-note").value.trim();
-            if (!title) return;
-            store.expenses.push({
-              id: `exp-${Date.now()}`,
-              clubName: refs.budgetClub.value,
-              title,
-              note: note || "정산 예정"
-            });
-            renderAdmin();
+  if (refs.expenseAdd) {
+    refs.expenseAdd.addEventListener("click", () => {
+      if (!refs.budgetClub || !refs.budgetMonth) return;
+      openModal({
+        title: "지출 추가",
+        content:
+          '<input id="club-expense-title" type="text" placeholder="항목" style="width:100%;margin-bottom:8px;" />' +
+          '<input id="club-expense-amount" type="number" inputmode="numeric" placeholder="금액" style="width:100%;margin-bottom:8px;" />' +
+          '<input id="club-expense-note" type="text" placeholder="메모 (옵션)" style="width:100%" />',
+        actions: [
+          {
+            label: "저장",
+            className: "club-btn-primary",
+            onClick: () => {
+              const title = document.getElementById("club-expense-title").value.trim();
+              const amountValue = Number(document.getElementById("club-expense-amount").value);
+              const note = document.getElementById("club-expense-note").value.trim();
+              if (!title || !Number.isFinite(amountValue) || amountValue <= 0) return;
+              store.expenses.push({
+                id: `exp-${Date.now()}`,
+                clubName: refs.budgetClub.value,
+                month: refs.budgetMonth.value,
+                title,
+                amount: amountValue,
+                note
+              });
+              renderAdmin();
+            }
           }
-        }
-      ]
+        ]
+      });
     });
-  });
+  }
 
-  refs.budgetClub.addEventListener("change", renderAdmin);
+  if (refs.budgetClub) refs.budgetClub.addEventListener("change", renderAdmin);
+  if (refs.budgetMonth) refs.budgetMonth.addEventListener("change", renderAdmin);
   refs.postsClub.addEventListener("change", renderAdmin);
 
   refs.postsAdd.addEventListener("click", () => {
@@ -1162,14 +1202,6 @@ function init() {
 
   refs.panelClose.addEventListener("click", closePanel);
   refs.overlay.addEventListener("click", closePanel);
-
-  refs.healthCta.addEventListener("click", () => {
-    openModal({
-      title: "번개 이벤트 생성",
-      content: "오늘 같이 운동 모집을 위한 템플릿입니다.",
-      actions: [{ label: "확인", className: "club-btn-primary" }]
-    });
-  });
 
   refs.modalClose.addEventListener("click", closeModal);
   refs.modal.addEventListener("click", (event) => {

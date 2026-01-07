@@ -24,6 +24,14 @@
         <button class="club-tab-btn" data-tab="calendar" type="button">Calendar</button>
         <button class="club-tab-btn" data-tab="admin" type="button">Admin</button>
       </div>
+      
+      <div id="club-admin-toggle-container" style="margin-left: auto; margin-right: 1rem; display: flex; align-items: center;" hidden>
+        <label class="club-toggle" for="club-admin-toggle" style="margin-bottom: 0;">
+          <input id="club-admin-toggle" type="checkbox" />
+          <span>관리자 모드</span>
+        </label>
+      </div>
+
       <div class="club-shell-meta" id="club-shell-meta">DISCOVER</div>
     </div>
 
@@ -121,12 +129,6 @@
       </section>
 
       <section class="club-tab-panel" data-tab-panel="admin" hidden>
-        <div class="club-admin-header">
-          <label class="club-toggle" for="club-admin-toggle">
-            <input id="club-admin-toggle" type="checkbox" />
-            <span>관리자 모드</span>
-          </label>
-        </div>
         <div id="club-admin-locked" class="club-empty">
           관리자 모드를 켜면 운영진 기능이 활성화됩니다.
         </div>
@@ -186,4 +188,28 @@
 {% include "club/_create_modal.html" %}
 
 <script src="{{ url_for('static', filename='js/club.js') }}"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const tabBtns = document.querySelectorAll('.club-tab-btn');
+    const adminToggleContainer = document.getElementById('club-admin-toggle-container');
+    const shellMeta = document.getElementById('club-shell-meta');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabName = btn.getAttribute('data-tab');
+
+        if (tabName === 'admin') {
+          // Admin 탭 선택 시: 토글 보임, 메타 텍스트 숨김
+          adminToggleContainer.hidden = false;
+          if(shellMeta) shellMeta.hidden = true;
+        } else {
+          // 다른 탭 선택 시: 토글 숨김, 메타 텍스트 보임
+          adminToggleContainer.hidden = true;
+          if(shellMeta) shellMeta.hidden = false;
+        }
+      });
+    });
+  });
+</script>
 {% endblock %}

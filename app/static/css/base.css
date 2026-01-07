@@ -28,7 +28,7 @@ body {
   background: var(--app-bg);
   font-family: var(--app-font);
   color: var(--app-text);
-  min-height: calc(100vh - 36px);
+  min-height: calc(100vh - 18px);
 }
 
 .page-header {
@@ -127,4 +127,3 @@ body {
   flex-direction: column;
   gap: 12px;
 }
-

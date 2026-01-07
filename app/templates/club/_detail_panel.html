@@ -12,11 +12,12 @@
     <button class="club-panel-tab is-active" data-panel-tab="overview" type="button">Overview</button>
     <button class="club-panel-tab" data-panel-tab="events" type="button">Events</button>
     <button class="club-panel-tab" data-panel-tab="members" type="button">Members</button>
-    <button class="club-panel-tab" data-panel-tab="budget" type="button">Budget</button>
   </div>
   <div class="club-panel-body">
     <section class="club-panel-section" data-panel-section="overview">
-      <button class="btn club-btn-primary" id="club-detail-join" type="button">가입하기</button>
+      <div class="club-panel-actions">
+        <button class="btn club-btn-primary" id="club-detail-join" type="button">가입하기</button>
+      </div>
       <div class="club-info-grid">
         <div class="club-info-card">
           <strong>다음 모임</strong>
@@ -31,13 +32,6 @@
       <div class="club-section">
         <div class="club-section-title">최근 공지/모집</div>
         <div id="club-detail-posts" class="club-list"></div>
-      </div>
-      <div id="club-health" class="club-health" hidden>
-        <div class="club-section-title">오늘 체크</div>
-        <label><input type="checkbox" /> 물</label>
-        <label><input type="checkbox" /> 운동</label>
-        <label><input type="checkbox" /> 수면</label>
-        <button class="btn club-btn-outline" id="club-health-cta" type="button">오늘 같이 운동 모집</button>
       </div>
     </section>
     <section class="club-panel-section" data-panel-section="events" hidden>
@@ -61,20 +55,6 @@
         <div class="club-list">
           <div class="club-pill">신청자 - SH</div>
           <div class="club-pill">신청자 - KR</div>
-        </div>
-      </div>
-    </section>
-    <section class="club-panel-section" data-panel-section="budget" hidden>
-      <div class="club-section-title">예산 현황</div>
-      <div class="club-info-grid">
-        <div class="club-info-card">이번 달 사용액: 정산 전</div>
-        <div class="club-info-card">잔액: 다음 정산까지 유지</div>
-      </div>
-      <div class="club-section">
-        <div class="club-section-title">지출 내역</div>
-        <div class="club-list">
-          <div class="club-pill">공간 대여 - 정산 예정</div>
-          <div class="club-pill">소모품 - 집계 중</div>
         </div>
       </div>
     </section>

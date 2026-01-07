@@ -15,6 +15,7 @@ CATEGORY_TO_TEAM = {
 STATUS_OPTIONS = ["PENDING", "APPROVED", "REJECTED", "COMPLETED"]
 URGENCY_OPTIONS = ["LOW", "NORMAL", "URGENT"]
 IDEA_STATUS_OPTIONS = ["새로운 제안", "검토 중", "해결 완료"]
+DEFAULT_CLUB_CATEGORIES = ["운동/건강", "취미/문화"]
 
 
 def _now_iso():
@@ -109,6 +110,39 @@ def init_db():
         if idea_count == 0:
             seed_ideas(conn)
             conn.commit()
+
+        _ensure_club_schema(conn)
+        conn.commit()
+
+
+def _ensure_club_schema(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS club_categories (
+            name TEXT PRIMARY KEY,
+            sort_order INTEGER NOT NULL
+        )
+        """
+    )
+
+    existing = {
+        row["name"]
+        for row in conn.execute("SELECT name FROM club_categories ORDER BY sort_order, name").fetchall()
+    }
+    if existing:
+        return
+
+    for index, name in enumerate(DEFAULT_CLUB_CATEGORIES):
+        conn.execute(
+            "INSERT OR IGNORE INTO club_categories (name, sort_order) VALUES (:name, :sort_order)",
+            {"name": name, "sort_order": index},
+        )
+
+
+def fetch_club_categories() -> list[str]:
+    with get_connection() as conn:
+        rows = conn.execute("SELECT name FROM club_categories ORDER BY sort_order, name").fetchall()
+        return [row["name"] for row in rows] or list(DEFAULT_CLUB_CATEGORIES)
 
 
 def seed_tickets(conn):
@@ -997,6 +1031,16 @@ def idea_exists(idea_id: int) -> bool:
     with get_connection() as conn:
         row = conn.execute("SELECT 1 FROM ideas WHERE id = :id", {"id": idea_id}).fetchone()
     return bool(row)
+
+
+def delete_idea(idea_id: int) -> bool:
+    with get_connection() as conn:
+        conn.execute("DELETE FROM idea_upvotes WHERE idea_id = :idea_id", {"idea_id": idea_id})
+        conn.execute("DELETE FROM idea_comments WHERE idea_id = :idea_id", {"idea_id": idea_id})
+        conn.execute("DELETE FROM idea_timeline WHERE idea_id = :idea_id", {"idea_id": idea_id})
+        cur = conn.execute("DELETE FROM ideas WHERE id = :idea_id", {"idea_id": idea_id})
+        conn.commit()
+        return (cur.rowcount or 0) > 0
 
 
 def _fetch_idea_timeline(conn, idea_id: int):

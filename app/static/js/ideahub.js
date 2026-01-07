@@ -25,9 +25,12 @@
   let selectedRating = 0;
   let currentCommentIdeaId = null;
 
+  // ✅ 현재 필터 유지용 (삭제 후 다시 로드)
+  let currentStatusFilter = "";
+
   document.addEventListener("DOMContentLoaded", () => {
     setupEventListeners();
-    loadIdeas();
+    loadIdeas("");
   });
 
   function setupEventListeners() {
@@ -64,9 +67,45 @@
         closeModal(modal);
         if (modal.id === "commentModal") resetCommentModal();
       }
+
+      // ✅ 아이디어 카드 ⋯ 메뉴: 바깥 클릭 시 닫기
+      if (!e.target.closest(".idea-more-wrap")) {
+        ideaFeed.querySelectorAll(".idea-more-menu").forEach((m) => (m.hidden = true));
+      }
     });
 
     ideaFeed.addEventListener("click", (e) => {
+      // ✅ ⋯ 메뉴 토글
+      const toggleBtn = e.target.closest('[data-action="toggle-idea-menu"]');
+      if (toggleBtn) {
+        const card = toggleBtn.closest(".idea-card");
+        if (!card) return;
+
+        // 다른 카드의 열린 메뉴 닫기
+        ideaFeed.querySelectorAll(".idea-more-menu").forEach((m) => {
+          if (!card.contains(m)) m.hidden = true;
+        });
+
+        const menu = card.querySelector(".idea-more-menu");
+        if (menu) menu.hidden = !menu.hidden;
+        return;
+      }
+
+      // ✅ 삭제
+      const deleteBtn = e.target.closest('[data-action="delete-idea"]');
+      if (deleteBtn) {
+        const ideaId = Number(deleteBtn.dataset.ideaId);
+        if (!Number.isFinite(ideaId)) return;
+
+        // 메뉴 닫기
+        ideaFeed.querySelectorAll(".idea-more-menu").forEach((m) => (m.hidden = true));
+
+        if (!confirm("이 글을 삭제할까요?")) return;
+
+        handleDeleteIdea(ideaId);
+        return;
+      }
+
       const upvoteBtn = e.target.closest(".idea-upvote");
       if (upvoteBtn) {
         const ideaId = Number(upvoteBtn.dataset.ideaId);
@@ -83,6 +122,9 @@
   }
 
   async function loadIdeas(statusFilter = "") {
+    // ✅ 현재 필터 저장
+    currentStatusFilter = statusFilter;
+
     try {
       const url = statusFilter
         ? `/api/ideas?status=${encodeURIComponent(statusFilter)}`
@@ -205,34 +247,49 @@
         : `<span class="idea-rating-summary"><span>별점 없음</span></span>`;
 
     return `
-      <article class="idea-card">
+      <article class="idea-card" data-idea-id="${Number(idea.id)}">
         <div class="idea-card-header">
           <div class="idea-avatar">${escapeHtml(initial)}</div>
           <div class="idea-meta">
             <div class="idea-author">${escapeHtml(author)}</div>
             <div class="idea-time">${escapeHtml(timeAgo)}</div>
           </div>
-          <span class="idea-status ${escapeAttr(statusClass)}">${escapeHtml(
-      idea.status || ""
-    )}</span>
+
+          <span class="idea-status ${escapeAttr(statusClass)}">${escapeHtml(idea.status || "")}</span>
+
+          <!-- ✅ 추가: ⋯ 메뉴(삭제) -->
+          <div class="idea-more-wrap">
+            <button
+              class="idea-more-btn"
+              type="button"
+              aria-label="메뉴"
+              data-action="toggle-idea-menu"
+              data-idea-id="${Number(idea.id)}"
+            >⋯</button>
+
+            <div class="idea-more-menu" hidden>
+              <button
+                class="idea-more-item"
+                type="button"
+                data-action="delete-idea"
+                data-idea-id="${Number(idea.id)}"
+              >삭제</button>
+            </div>
+          </div>
         </div>
 
         <div class="idea-card-body">
           <h3 class="idea-title">${escapeHtml(idea.title || "")}</h3>
           <p class="idea-content">${escapeHtml(idea.content || "")}</p>
-          ${
-            category
-              ? `<span class="idea-category">#${escapeHtml(category)}</span>`
-              : ""
-          }
+          ${category ? `<span class="idea-category">#${escapeHtml(category)}</span>` : ""}
           ${completedHTML}
           ${timelineHTML}
         </div>
 
         <div class="idea-card-footer">
           <button class="idea-upvote ${hasVoted ? "is-voted" : ""}" data-idea-id="${Number(
-      idea.id
-    )}" type="button">
+            idea.id
+          )}" type="button">
             👍 <span class="idea-upvote-count">${Number(idea.upvotes || 0)}</span>
           </button>
           ${ratingHTML}
@@ -244,6 +301,7 @@
 
   function handleFilter(button) {
     const status = button.dataset.status || "";
+    currentStatusFilter = status; // ✅ 유지
     filterButtons.forEach((btn) => btn.classList.remove("is-active"));
     button.classList.add("is-active");
     loadIdeas(status);
@@ -310,6 +368,32 @@
       }, 180);
     } catch (error) {
       console.error("Failed to upvote:", error);
+    }
+  }
+
+  // ✅ 추가: 삭제 처리
+  async function handleDeleteIdea(ideaId) {
+    try {
+      const response = await fetch(`/api/ideas/${ideaId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: USER_ID }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.success === false) throw new Error("DELETE_FAILED");
+
+      // 로컬 upvote 기록도 제거(선택)
+      if (upvotedIdeas.has(ideaId)) {
+        upvotedIdeas.delete(ideaId);
+        persistUpvotedToStorage(upvotedIdeas);
+      }
+
+      await loadIdeas(currentStatusFilter);
+      alert("✅ 삭제되었습니다.");
+    } catch (error) {
+      console.error("Failed to delete idea:", error);
+      alert("❌ 삭제에 실패했습니다.");
     }
   }
 
@@ -442,4 +526,3 @@
     return escapeHtml(value).replaceAll("`", "&#96;");
   }
 })();
-

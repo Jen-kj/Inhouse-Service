@@ -12,8 +12,9 @@
       <label>
         <span>카테고리</span>
         <select name="category" required>
-          <option value="운동/건강">운동/건강</option>
-          <option value="취미/문화">취미/문화</option>
+          {% for category in club_categories %}
+            <option value="{{ category }}">{{ category }}</option>
+          {% endfor %}
         </select>
       </label>
       <label>

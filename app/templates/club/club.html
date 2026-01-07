@@ -32,8 +32,9 @@
         <div class="club-filter" aria-label="검색 및 필터">
           <div class="club-category" role="tablist" aria-label="카테고리">
             <button class="club-chip is-active" data-category="전체" type="button">전체</button>
-            <button class="club-chip" data-category="운동/건강" type="button">운동/건강</button>
-            <button class="club-chip" data-category="취미/문화" type="button">취미/문화</button>
+            {% for category in club_categories %}
+              <button class="club-chip" data-category="{{ category }}" type="button">{{ category }}</button>
+            {% endfor %}
           </div>
           <label class="club-search" aria-label="클럽 검색">
             <input id="club-search" type="search" placeholder="클럽명 검색" aria-label="클럽 검색" />
@@ -118,22 +119,23 @@
         </div>
       </section>
 
+      <!-- ✅ Admin: 관리자 모드 선택 프로세스 제거 -->
       <section class="club-tab-panel" data-tab-panel="admin" hidden>
-        <div class="club-admin-header">
-          <label class="club-toggle" for="club-admin-toggle">
-            <input id="club-admin-toggle" type="checkbox" />
-            <span>관리자 모드</span>
-          </label>
-        </div>
-        <div id="club-admin-locked" class="club-empty">
-          관리자 모드를 켜면 운영진 기능이 활성화됩니다.
-        </div>
-        <div id="club-admin-panel" hidden>
+
+        <!-- club.js 호환용: 토글은 UI에서 제거하지만, DOM에는 유지(항상 ON) -->
+        <input id="club-admin-toggle" type="checkbox" checked hidden>
+
+        <!-- 잠금 안내는 남겨두되, 항상 숨김 처리(혹시 club.js가 찾을 수 있으니 id 유지) -->
+        <div id="club-admin-locked" class="club-empty" hidden></div>
+
+        <!-- ✅ 들어오면 바로 보이게 hidden 제거 -->
+        <div id="club-admin-panel">
           <div class="club-admin-tabs" role="tablist">
             <button class="club-admin-btn is-active" data-admin-tab="approvals" type="button">Approvals</button>
-            <button class="club-admin-btn" data-admin-tab="budget" type="button">Budget</button>
+            <button class="club-admin-btn" data-admin-tab="budget" type="button">Budgets</button>
             <button class="club-admin-btn" data-admin-tab="posts" type="button">Posts</button>
           </div>
+
           <div class="club-admin-body">
             <section data-admin-panel="approvals">
               <div class="club-section-title">가입 승인 요청</div>
@@ -141,17 +143,15 @@
               <div class="club-section-title">개설 신청</div>
               <div id="club-create-approvals" class="club-list"></div>
             </section>
+
             <section data-admin-panel="budget" hidden>
               <div class="club-filter-row">
                 <label class="club-select">
-                  <span>월 선택</span>
-                  <select id="club-budget-month">
-                    <option value="이번 달">이번 달</option>
-                    <option value="지난 달">지난 달</option>
-                  </select>
+                  <span>월</span>
+                  <select id="club-budget-month"></select>
                 </label>
                 <label class="club-select">
-                  <span>클럽 선택</span>
+                  <span>클럽</span>
                   <select id="club-budget-club"></select>
                 </label>
               </div>
@@ -162,6 +162,7 @@
                 <button class="btn club-btn-outline" id="club-expense-add" type="button">지출 추가</button>
               </div>
             </section>
+
             <section data-admin-panel="posts" hidden>
               <div class="club-filter-row">
                 <label class="club-select">
@@ -184,4 +185,33 @@
 {% include "club/_create_modal.html" %}
 
 <script src="{{ url_for('static', filename='js/club.js') }}"></script>
+
+<!-- ✅ club.js가 '관리자 모드 토글'을 전제로 짜여 있어도, 항상 관리자 모드 ON으로 강제 -->
+<script>
+  (function () {
+    function forceAdminOn() {
+      const toggle = document.getElementById("club-admin-toggle");
+      const locked = document.getElementById("club-admin-locked");
+      const panel = document.getElementById("club-admin-panel");
+
+      if (toggle) {
+        toggle.checked = true;
+        toggle.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      if (locked) locked.hidden = true;
+      if (panel) panel.hidden = false;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      forceAdminOn();
+
+      // Admin 탭 눌렀을 때도 매번 강제(혹시 club.js가 숨겨버리는 경우 대비)
+      document.querySelectorAll('.club-tab-btn[data-tab="admin"]').forEach((btn) => {
+        btn.addEventListener("click", () => {
+          setTimeout(forceAdminOn, 0);
+        });
+      });
+    });
+  })();
+</script>
 {% endblock %}
