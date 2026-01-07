@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/onboarding.css') }}">
+
+<div class="onboarding-shell">
+  <div class="onboarding-container">
+    <header class="onboarding-header">
+      <div>
+        <div class="page-eyebrow">사내 온보딩</div>
+        <h1 class="page-title">Onboarding</h1>
+        <p class="page-subtitle">노타 행성에 착륙한 것을 환영합니다! 퀘스트를 완료하고 궁금한 점을 해결하세요.</p>
+      </div>
+    </header>
+
+    <div class="dashboard">
+      <div class="quest-panel">
+        <div class="quest-header">
+          <h2>📋 나의 퀘스트</h2>
+          <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar">0%</div>
+          </div>
+          <p class="progress-text" id="progressText">노타 적응 0% 완료!</p>
+        </div>
+
+        <div class="quest-category">
+          <div class="category-title">🌅 Day 1 - 밀착 가이드</div>
+
+          <div class="quest-item" data-quest="day1-equipment">
+            <div class="quest-checkbox"></div>
+            <div class="quest-content">
+              <p class="quest-title">노트북 및 장비 수령</p>
+              <p class="quest-description">경영지원팀에서 노트북, 마우스, 키보드를 받으세요</p>
+            </div>
+          </div>
+
+          <div class="quest-item" data-quest="day1-slack">
+            <div class="quest-checkbox"></div>
+            <div class="quest-content">
+              <p class="quest-title">슬랙 가입 및 프로필 설정</p>
+              <p class="quest-description">사진, 직무, 한 줄 소개를 작성해주세요</p>
+            </div>
+          </div>
+
+          <div class="quest-item" data-quest="day1-tour">
+            <div class="quest-checkbox"></div>
+            <div class="quest-content">
+              <p class="quest-title">오피스 투어 참여</p>
+              <p class="quest-description">회의실, 휴게실, 탕비실 위치를 확인하세요</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="quest-category">
+          <div class="category-title">🎯 Week 1 - Alignment</div>
+
+          <div class="quest-item" data-quest="week1-lp">
+            <div class="quest-checkbox"></div>
+            <div class="quest-content">
+              <p class="quest-title">리더십 원칙(LP) 세션 참석</p>
+              <p class="quest-description">노타의 핵심 가치를 이해하세요</p>
+            </div>
+          </div>
+
+          <div class="quest-item" data-quest="week1-meeting">
+            <div class="quest-checkbox"></div>
+            <div class="quest-content">
+              <p class="quest-title">팀 리드와 1:1 미팅 신청</p>
+              <p class="quest-description">업무 목표와 기대사항을 논의하세요</p>
+            </div>
+          </div>
+
+          <div class="quest-item" data-quest="week1-wiki">
+            <div class="quest-checkbox"></div>
+            <div class="quest-content">
+              <p class="quest-title">사내 위키 탐험</p>
+              <p class="quest-description">업무 프로세스와 문서를 파악하세요</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="quest-category">
+          <div class="category-title">💪 Month 1-3 - 몰입</div>
+
+          <div class="quest-item" data-quest="month1-feedback">
+            <div class="quest-checkbox"></div>
+            <div class="quest-content">
+              <p class="quest-title">넷츠프레소 첫 피드백 남기기</p>
+              <p class="quest-description">동료에게 긍정적 피드백을 전달하세요</p>
+            </div>
+          </div>
+
+          <div class="quest-item" data-quest="month1-club">
+            <div class="quest-checkbox"></div>
+            <div class="quest-content">
+              <p class="quest-title">동호회 가입하기</p>
+              <p class="quest-description">Nota Clubs에서 관심사를 공유하세요</p>
+            </div>
+          </div>
+
+          <div class="quest-item" data-quest="month3-project">
+            <div class="quest-checkbox"></div>
+            <div class="quest-content">
+              <p class="quest-title">첫 프로젝트 완료</p>
+              <p class="quest-description">팀에 기여하는 첫 결과물을 만드세요</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="qa-panel">
+        <div class="qa-header">
+          <h2>💡 무엇이든 물어보세요</h2>
+
+          <div class="search-container">
+            <span class="search-icon" aria-hidden="true">🔍</span>
+            <input
+              type="text"
+              class="search-input"
+              id="searchInput"
+              placeholder="궁금한 점을 검색하세요... (예: 법인카드, 모니터)"
+            >
+          </div>
+
+          <div class="tag-filter">
+            <button class="tag-btn active" data-tag="">전체</button>
+            <button class="tag-btn" data-tag="장비">#장비</button>
+            <button class="tag-btn" data-tag="복지">#복지</button>
+            <button class="tag-btn" data-tag="LP">#LP</button>
+            <button class="tag-btn" data-tag="문화">#문화</button>
+            <button class="tag-btn" data-tag="시설">#시설</button>
+          </div>
+        </div>
+
+        <div class="qa-list" id="qaList"></div>
+
+        <button class="ask-question-btn" id="askQuestionBtn">질문하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="congrats-toast" id="congratsToast">퀘스트 완료!</div>
+
+<div class="modal" id="questionModal">
+  <div class="modal-content">
+    <h3 class="modal-header">새로운 질문 작성</h3>
+    <p class="modal-description">궁금한 점이 있으신가요? 질문을 남겨주시면 선배 크루들이 답변해드립니다.</p>
+
+    <input
+      type="text"
+      class="modal-input"
+      id="questionInput"
+      placeholder="질문을 입력하세요 (예: 법인카드는 어떻게 사용하나요?)"
+    >
+    <textarea class="modal-textarea" id="detailInput" placeholder="상세 내용 (선택사항)"></textarea>
+    <input type="text" class="modal-input" id="askerInput" placeholder="이름을 입력하세요">
+    <input type="text" class="modal-input" id="tagsInput" placeholder="태그 (예: #장비, #복지) - 선택사항">
+
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-secondary" id="cancelBtn">취소</button>
+      <button class="modal-btn modal-btn-primary" id="submitBtn">등록</button>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/onboarding.js') }}"></script>
+{% endblock %}

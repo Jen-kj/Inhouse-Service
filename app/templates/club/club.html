@@ -1,0 +1,187 @@
+﻿{% extends "base.html" %}
+{% set title = "동아리" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/club.css') }}">
+
+<div class="page club-page" data-page="clubs">
+  <header class="page-header">
+    <div class="page-title-block">
+      <div class="page-eyebrow">CLUBS</div>
+      <h1 class="page-title">동아리</h1>
+      <p class="page-subtitle">동아리 분위기를 한눈에 보고, 바로 가입하고 일정에 참여해보세요.</p>
+    </div>
+    <div class="page-header-actions">
+      <button class="btn club-btn-outline" id="club-create-cta" type="button">동아리 개설</button>
+    </div>
+  </header>
+
+  <section class="club-shell">
+    <div class="club-shell-header">
+      <div class="club-tabs" role="tablist">
+        <button class="club-tab-btn is-active" data-tab="discover" type="button">Discover</button>
+        <button class="club-tab-btn" data-tab="my" type="button">My Clubs</button>
+        <button class="club-tab-btn" data-tab="calendar" type="button">Calendar</button>
+        <button class="club-tab-btn" data-tab="admin" type="button">Admin</button>
+      </div>
+      <div class="club-shell-meta" id="club-shell-meta">DISCOVER</div>
+    </div>
+
+    <div class="club-shell-body">
+      <section class="club-tab-panel" data-tab-panel="discover">
+        <div class="club-filter" aria-label="검색 및 필터">
+          <div class="club-category" role="tablist" aria-label="카테고리">
+            <button class="club-chip is-active" data-category="전체" type="button">전체</button>
+            <button class="club-chip" data-category="운동/건강" type="button">운동/건강</button>
+            <button class="club-chip" data-category="취미/문화" type="button">취미/문화</button>
+          </div>
+          <label class="club-search" aria-label="클럽 검색">
+            <input id="club-search" type="search" placeholder="클럽명 검색" aria-label="클럽 검색" />
+          </label>
+        </div>
+
+        <div class="club-grid" id="club-grid"></div>
+      </section>
+
+      <section class="club-tab-panel" data-tab-panel="my" hidden>
+        <div class="club-section">
+          <div class="club-section-title">내 동아리 바로가기</div>
+          <div class="club-mini-grid" id="club-my-list"></div>
+        </div>
+        <div class="club-section">
+          <div class="club-section-title">다가오는 내 일정</div>
+          <div class="club-event-list" id="club-my-events"></div>
+        </div>
+      </section>
+
+      <section class="club-tab-panel" data-tab-panel="calendar" hidden>
+        <div class="club-calendar">
+          <div class="club-calendar-header">
+            <div class="club-calendar-nav">
+              <button class="club-icon-btn" id="club-calendar-prev" type="button">◀</button>
+              <div class="club-calendar-label" id="club-calendar-label">2026.01</div>
+              <button class="club-icon-btn" id="club-calendar-next" type="button">▶</button>
+            </div>
+            <div class="club-calendar-controls">
+              <label class="club-select">
+                <span>보기</span>
+                <select id="club-calendar-view">
+                  <option value="month">월간</option>
+                </select>
+              </label>
+              <label class="club-select">
+                <span>카테고리</span>
+                <select id="club-calendar-category">
+                  <option value="">전체</option>
+                  <option value="운동/건강">운동/건강</option>
+                  <option value="취미/문화">취미/문화</option>
+                </select>
+              </label>
+              <label class="club-select">
+                <span>활동 방식</span>
+                <select id="club-calendar-format">
+                  <option value="">전체</option>
+                  <option value="정기 모임">정기 모임</option>
+                  <option value="번개 중심">번개 중심</option>
+                  <option value="혼합 운영">혼합 운영</option>
+                </select>
+              </label>
+              <label class="club-select">
+                <span>동아리</span>
+                <select id="club-calendar-club"></select>
+              </label>
+              <label class="club-search">
+                <span>검색</span>
+                <input id="club-calendar-search" type="search" placeholder="이벤트명/동아리명" />
+              </label>
+            </div>
+            <button class="btn club-btn-outline" id="club-calendar-create" type="button" hidden>이벤트 생성</button>
+          </div>
+          <div class="club-calendar-body">
+            <div>
+              <div class="club-calendar-week">
+                <div>일</div>
+                <div>월</div>
+                <div>화</div>
+                <div>수</div>
+                <div>목</div>
+                <div>금</div>
+                <div>토</div>
+              </div>
+              <div class="club-calendar-grid" id="club-calendar-grid"></div>
+            </div>
+            <aside class="club-calendar-panel" id="club-calendar-panel">
+              <div class="club-section-title" id="club-calendar-panel-title">날짜를 선택하세요</div>
+              <div class="club-list" id="club-calendar-panel-list"></div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="club-tab-panel" data-tab-panel="admin" hidden>
+        <div class="club-admin-header">
+          <label class="club-toggle" for="club-admin-toggle">
+            <input id="club-admin-toggle" type="checkbox" />
+            <span>관리자 모드</span>
+          </label>
+        </div>
+        <div id="club-admin-locked" class="club-empty">
+          관리자 모드를 켜면 운영진 기능이 활성화됩니다.
+        </div>
+        <div id="club-admin-panel" hidden>
+          <div class="club-admin-tabs" role="tablist">
+            <button class="club-admin-btn is-active" data-admin-tab="approvals" type="button">Approvals</button>
+            <button class="club-admin-btn" data-admin-tab="budget" type="button">Budget</button>
+            <button class="club-admin-btn" data-admin-tab="posts" type="button">Posts</button>
+          </div>
+          <div class="club-admin-body">
+            <section data-admin-panel="approvals">
+              <div class="club-section-title">가입 승인 요청</div>
+              <div id="club-join-approvals" class="club-list"></div>
+              <div class="club-section-title">개설 신청</div>
+              <div id="club-create-approvals" class="club-list"></div>
+            </section>
+            <section data-admin-panel="budget" hidden>
+              <div class="club-filter-row">
+                <label class="club-select">
+                  <span>월 선택</span>
+                  <select id="club-budget-month">
+                    <option value="이번 달">이번 달</option>
+                    <option value="지난 달">지난 달</option>
+                  </select>
+                </label>
+                <label class="club-select">
+                  <span>클럽 선택</span>
+                  <select id="club-budget-club"></select>
+                </label>
+              </div>
+              <div class="club-summary" id="club-budget-summary"></div>
+              <div class="club-section">
+                <div class="club-section-title">지출 내역</div>
+                <div id="club-expense-list" class="club-list"></div>
+                <button class="btn club-btn-outline" id="club-expense-add" type="button">지출 추가</button>
+              </div>
+            </section>
+            <section data-admin-panel="posts" hidden>
+              <div class="club-filter-row">
+                <label class="club-select">
+                  <span>클럽 선택</span>
+                  <select id="club-posts-club"></select>
+                </label>
+                <button class="btn club-btn-outline" id="club-posts-add" type="button">글 작성</button>
+              </div>
+              <div id="club-posts-list" class="club-list"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+</div>
+
+{% include "club/_detail_panel.html" %}
+{% include "club/_modal.html" %}
+{% include "club/_create_modal.html" %}
+
+<script src="{{ url_for('static', filename='js/club.js') }}"></script>
+{% endblock %}

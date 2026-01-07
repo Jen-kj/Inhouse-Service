@@ -1,0 +1,68 @@
+<div class="club-modal" id="club-create-modal" hidden role="dialog" aria-modal="true">
+  <div class="club-modal-body">
+    <div class="club-modal-header">
+      <h3>동아리 개설 신청</h3>
+      <button class="btn club-btn-outline" id="club-create-close" type="button">닫기</button>
+    </div>
+    <form class="club-form club-form--modal" id="club-create-form">
+      <label>
+        <span>동아리명</span>
+        <input type="text" name="name" required />
+      </label>
+      <label>
+        <span>카테고리</span>
+        <select name="category" required>
+          <option value="운동/건강">운동/건강</option>
+          <option value="취미/문화">취미/문화</option>
+        </select>
+      </label>
+      <label>
+        <span>한 줄 소개 (60자)</span>
+        <input type="text" name="moodLine" maxlength="60" required />
+      </label>
+      <label>
+        <span>활동 방식</span>
+        <select name="format" required>
+          <option value="정기 모임">정기 모임</option>
+          <option value="번개 중심">번개 중심</option>
+          <option value="혼합 운영">혼합 운영</option>
+        </select>
+      </label>
+      <label>
+        <span>가입 방식</span>
+        <select name="joinPolicy" required>
+          <option value="바로 가입">바로 가입</option>
+          <option value="승인 필요">승인 필요</option>
+        </select>
+      </label>
+      <label>
+        <span>정기 일정 (옵션)</span>
+        <input type="text" name="schedule" placeholder="예: 수요일 점심" />
+      </label>
+      <label class="club-checkbox">
+        <input type="checkbox" name="flashOnly" />
+        <span>번개 위주 운영</span>
+      </label>
+      <label>
+        <span>활동 장소</span>
+        <select name="place" required>
+          <option value="오피스">오피스</option>
+          <option value="외부">외부</option>
+          <option value="혼합">혼합</option>
+        </select>
+      </label>
+      <label>
+        <span>Slack 채널</span>
+        <input type="text" name="slack" placeholder="예: #club-xxx" />
+      </label>
+      <label class="club-checkbox">
+        <input type="checkbox" name="slackSuggest" />
+        <span>Slack 채널 자동 생성 제안</span>
+      </label>
+      <div class="club-modal-actions">
+        <button class="btn club-btn-outline" id="club-create-cancel" type="button">취소</button>
+        <button class="btn club-btn-primary" type="submit">신청하기</button>
+      </div>
+    </form>
+  </div>
+</div>

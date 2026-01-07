@@ -1,0 +1,82 @@
+<div class="club-overlay" id="club-overlay" hidden></div>
+
+<aside class="club-panel" id="club-panel" aria-modal="true" role="dialog" hidden>
+  <div class="club-panel-header">
+    <div>
+      <div class="club-badge" id="club-detail-category">운동/건강</div>
+      <h2 id="club-detail-title">클럽명</h2>
+    </div>
+    <button class="btn club-btn-outline" id="club-panel-close" type="button">닫기</button>
+  </div>
+  <div class="club-panel-tabs" role="tablist">
+    <button class="club-panel-tab is-active" data-panel-tab="overview" type="button">Overview</button>
+    <button class="club-panel-tab" data-panel-tab="events" type="button">Events</button>
+    <button class="club-panel-tab" data-panel-tab="members" type="button">Members</button>
+    <button class="club-panel-tab" data-panel-tab="budget" type="button">Budget</button>
+  </div>
+  <div class="club-panel-body">
+    <section class="club-panel-section" data-panel-section="overview">
+      <button class="btn club-btn-primary" id="club-detail-join" type="button">가입하기</button>
+      <div class="club-info-grid">
+        <div class="club-info-card">
+          <strong>다음 모임</strong>
+          <p>다음 주 실내 공간에서 가볍게 활동을 시작합니다.</p>
+        </div>
+        <div class="club-info-card">
+          <strong>연락 방법</strong>
+          <p>Slack 채널과 운영진 이메일로 안내합니다.</p>
+        </div>
+        <div class="club-info-card" id="club-detail-tags"></div>
+      </div>
+      <div class="club-section">
+        <div class="club-section-title">최근 공지/모집</div>
+        <div id="club-detail-posts" class="club-list"></div>
+      </div>
+      <div id="club-health" class="club-health" hidden>
+        <div class="club-section-title">오늘 체크</div>
+        <label><input type="checkbox" /> 물</label>
+        <label><input type="checkbox" /> 운동</label>
+        <label><input type="checkbox" /> 수면</label>
+        <button class="btn club-btn-outline" id="club-health-cta" type="button">오늘 같이 운동 모집</button>
+      </div>
+    </section>
+    <section class="club-panel-section" data-panel-section="events" hidden>
+      <div class="club-section-title">예정된 일정</div>
+      <div id="club-detail-events" class="club-list"></div>
+    </section>
+    <section class="club-panel-section" data-panel-section="members" hidden>
+      <div class="club-section-title">운영진</div>
+      <div class="club-list">
+        <div class="club-pill">운영진 - MJ</div>
+        <div class="club-pill">운영진 - JH</div>
+      </div>
+      <div class="club-section-title">멤버</div>
+      <div class="club-list">
+        <div class="club-pill">멤버 - SY</div>
+        <div class="club-pill">멤버 - HY</div>
+        <div class="club-pill">멤버 - DK</div>
+      </div>
+      <div id="club-detail-requests" hidden>
+        <div class="club-section-title">가입 요청</div>
+        <div class="club-list">
+          <div class="club-pill">신청자 - SH</div>
+          <div class="club-pill">신청자 - KR</div>
+        </div>
+      </div>
+    </section>
+    <section class="club-panel-section" data-panel-section="budget" hidden>
+      <div class="club-section-title">예산 현황</div>
+      <div class="club-info-grid">
+        <div class="club-info-card">이번 달 사용액: 정산 전</div>
+        <div class="club-info-card">잔액: 다음 정산까지 유지</div>
+      </div>
+      <div class="club-section">
+        <div class="club-section-title">지출 내역</div>
+        <div class="club-list">
+          <div class="club-pill">공간 대여 - 정산 예정</div>
+          <div class="club-pill">소모품 - 집계 중</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</aside>

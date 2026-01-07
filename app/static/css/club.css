@@ -1,0 +1,875 @@
+﻿:root {
+  --club-card: var(--app-card);
+  --club-ink: var(--app-text);
+  --club-muted: var(--app-muted);
+  --club-line: var(--app-border);
+  --club-accent: #06b6d4;
+  --club-accent-2: #0891b2;
+  --club-accent-3: #64748b;
+  --club-surface: #f8fafc;
+  --club-radius-lg: var(--app-radius-lg);
+  --club-radius-md: var(--app-radius);
+  --club-radius-sm: 10px;
+  --club-shadow: var(--app-shadow);
+}
+
+.club-page {
+  padding: 32px 28px;
+}
+
+.club-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--club-muted);
+}
+
+.club-shell {
+  background: var(--club-card);
+  border-radius: var(--club-radius-lg);
+  border: 1px solid var(--club-line);
+  box-shadow: var(--club-shadow);
+}
+
+.club-shell-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--club-line);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.club-shell-meta {
+  font-size: 0.9rem;
+  color: var(--club-muted);
+}
+
+.club-tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.club-tab-btn {
+  border: 1px solid var(--club-line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.club-tab-btn.is-active {
+  background: var(--club-accent);
+  color: #fff;
+  border-color: var(--club-accent);
+}
+
+.club-shell-body {
+  padding: 32px;
+  display: grid;
+  gap: 36px;
+}
+
+.club-filter {
+  display: grid;
+  gap: 18px;
+  background: var(--club-surface);
+  border-radius: var(--club-radius-lg);
+  border: 1px solid var(--club-line);
+  padding: 20px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.club-filter-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.club-filter + .club-grid {
+  margin-top: 22px;
+}
+
+.club-search,
+.club-select {
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--club-muted);
+}
+
+.club-search input,
+.club-select select,
+.club-form input,
+.club-form select,
+.club-form textarea {
+  border-radius: var(--club-radius-sm);
+  border: 1px solid #e5e7eb;
+  padding: 12px 14px;
+  font: inherit;
+  background: #fff;
+  color: #111;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.club-search input:focus,
+.club-select select:focus,
+.club-form input:focus,
+.club-form select:focus,
+.club-form textarea:focus {
+  border-color: rgba(6, 182, 212, 0.9);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.18);
+  outline: none;
+}
+
+.club-form input::placeholder,
+.club-form textarea::placeholder,
+.club-search input::placeholder {
+  color: #9ca3af;
+}
+
+.club-form {
+  display: grid;
+  gap: 14px;
+}
+
+.club-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.club-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--club-muted);
+}
+
+.club-form--modal {
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.club-form--modal label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.club-form--modal .club-form-row {
+  grid-template-columns: 1fr;
+}
+
+.club-tab-panel {
+  display: grid;
+  gap: 32px;
+}
+
+.club-tab-panel[hidden] {
+  display: none;
+}
+
+.club-category {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.club-chip {
+  border: 1px solid var(--club-line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 18px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: 0.2s ease;
+}
+
+.club-chip.is-active {
+  background: var(--club-accent);
+  border-color: var(--club-accent);
+  color: #fff;
+  box-shadow: 0 10px 20px rgba(6, 182, 212, 0.35);
+}
+
+.club-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+.club-card {
+  border: 1px solid #e5e7eb;
+  border-radius: var(--club-radius-lg);
+  padding: 22px;
+  display: grid;
+  gap: 14px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  min-height: 260px;
+}
+
+.club-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.15);
+}
+
+.club-badge {
+  display: inline-flex;
+  border: 1px solid var(--club-line);
+  background: #f3f4f6;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  width: fit-content;
+}
+
+.club-badge--sport {
+  color: #0f766e;
+  background: #def7ec;
+  border-color: #c7f1de;
+}
+
+.club-badge--hobby {
+  color: #6d28d9;
+  background: #ede9fe;
+  border-color: #d6d3ff;
+}
+
+.club-name {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.club-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.club-chip-mini {
+  font-size: 0.75rem;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+.club-mood {
+  margin: 0;
+  color: var(--club-muted);
+  font-size: 0.92rem;
+}
+
+.club-divider {
+  height: 1px;
+  background: var(--club-line);
+  border: none;
+}
+
+.club-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.club-member {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--club-muted);
+  font-size: 0.9rem;
+}
+
+.club-card-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.club-card-actions button {
+  border-radius: 999px;
+  padding: 8px 18px;
+  min-width: 110px;
+  font-weight: 600;
+}
+
+.club-recommend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.club-recommend-card {
+  border: 1px solid var(--club-line);
+  border-radius: var(--club-radius-lg);
+  padding: 14px;
+  background: #fff;
+  display: grid;
+  gap: 10px;
+}
+
+.club-section {
+  display: grid;
+  gap: 20px;
+}
+
+.club-tab-panel[data-tab-panel="my"] {
+  gap: 40px;
+}
+
+.club-section-title {
+  font-weight: 700;
+}
+
+.club-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.club-mini-card {
+  border: 1px solid var(--club-line);
+  border-radius: var(--club-radius-md);
+  padding: 16px;
+  background: #fff;
+  display: grid;
+  gap: 10px;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.05);
+}
+
+.club-mini-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.club-event-list,
+.club-list {
+  display: grid;
+  gap: 14px;
+}
+
+.club-event {
+  border: 1px solid #e5e7eb;
+  border-radius: var(--club-radius-md);
+  padding: 14px;
+  background: #fff;
+  display: grid;
+  gap: 10px;
+}
+
+.club-rsvp {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.club-calendar {
+  display: grid;
+  gap: 20px;
+}
+
+.club-calendar-header {
+  display: grid;
+  gap: 14px;
+  align-items: center;
+}
+
+.club-calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.club-calendar-label {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.club-calendar-controls {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.club-calendar-body {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+  gap: 22px;
+}
+
+.club-calendar-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  font-size: 0.85rem;
+  color: var(--club-muted);
+  margin-bottom: 10px;
+}
+
+.club-calendar-week div {
+  padding: 6px 8px;
+}
+
+.club-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;
+}
+
+.club-calendar-cell {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 14px;
+  min-height: 150px;
+  display: grid;
+  gap: 10px;
+  background: #fff;
+  cursor: pointer;
+  position: relative;
+}
+
+.club-event-bar {
+  border-radius: 10px;
+  font-size: 0.82rem;
+  line-height: 1.25;
+  padding: 4px 10px;
+  color: #0f172a;
+  border: 0;
+  background: #e0f2fe;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 22px;
+  max-height: none;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: break-word;
+}
+
+.club-event-bar.is-sports {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.club-event-bar.is-hobby {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.club-event-bar.singular {
+  border-radius: 10px;
+}
+
+.club-event-bar.start {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.club-event-bar.middle {
+  border-radius: 0;
+}
+
+.club-event-bar.end {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.club-event-bar.overflow {
+  background: #e5e7eb;
+  color: var(--club-muted);
+  border-radius: 10px;
+  text-align: center;
+  padding: 0 6px;
+}
+
+.club-calendar-cell.is-muted {
+  background: #f3f4f6;
+  color: #9aa3af;
+}
+
+.club-calendar-cell.is-selected {
+  border-color: var(--club-accent);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.12);
+}
+
+.club-calendar-date {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.club-calendar-chip {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2px 8px;
+  border-radius: 6px;
+  min-height: 20px;
+  font-size: 0.72rem;
+  border: 1px solid var(--club-line);
+  background: #f8fafc;
+  width: 100%;
+  max-width: 100%;
+  white-space: normal;
+  overflow: visible;
+}
+
+.club-calendar-chip.is-sports {
+  border-color: rgba(37, 99, 235, 0.4);
+  color: #1d4ed8;
+}
+
+.club-calendar-chip.is-hobby {
+  border-color: rgba(216, 90, 63, 0.4);
+  color: #b45309;
+}
+
+
+.club-calendar-more {
+  font-size: 0.75rem;
+  color: var(--club-muted);
+}
+
+.club-calendar-panel {
+  border: 1px solid #e5e7eb;
+  border-radius: var(--club-radius-md);
+  padding: 20px;
+  background: #fff;
+  min-height: 220px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.club-icon-btn {
+  border: 1px solid var(--club-line);
+  background: #fff;
+  border-radius: 999px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.club-admin-tabs {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.club-admin-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 22px;
+}
+
+.club-admin-body {
+  display: grid;
+  gap: 26px;
+}
+
+.club-admin-btn {
+  border: 1px solid var(--club-line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+
+.club-admin-btn.is-active {
+  background: var(--club-accent);
+  border-color: var(--club-accent);
+  color: #fff;
+}
+
+.club-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.club-summary-card {
+  border: 1px solid var(--club-line);
+  border-radius: var(--club-radius-md);
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.club-pill {
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--club-line);
+  background: #fff;
+}
+
+.club-empty {
+  padding: 18px;
+  background: #f8fafc;
+  border-radius: var(--club-radius-md);
+  border: 1px dashed #d9dce3;
+  color: var(--club-muted);
+}
+
+.club-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: min(520px, 100%);
+  background: #fff;
+  border-left: 1px solid var(--club-line);
+  box-shadow: -8px 0 20px rgba(0, 0, 0, 0.1);
+  z-index: 40;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+}
+
+.club-panel-header {
+  padding: 32px;
+  border-bottom: 1px solid var(--club-line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.club-panel-header h2 {
+  margin: 0;
+  font-size: 1.55rem;
+}
+
+.club-panel-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 14px 32px;
+  border-bottom: 1px solid var(--club-line);
+  background: #fafafa;
+  flex-wrap: wrap;
+}
+
+.club-panel-tab {
+  border: 1px solid var(--club-line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.club-panel-tab.is-active {
+  background: var(--club-accent);
+  border-color: var(--club-accent);
+  color: #fff;
+}
+
+.club-panel-body {
+  padding: 32px;
+  overflow-y: auto;
+  display: grid;
+  gap: 20px;
+}
+
+.club-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.club-info-card {
+  border-radius: var(--club-radius-md);
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px solid var(--club-line);
+}
+
+.club-health {
+  display: grid;
+  gap: 8px;
+  border: 1px dashed #d5d7de;
+  padding: 12px;
+  border-radius: var(--club-radius-md);
+  background: #f8fafc;
+}
+
+.club-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 16, 22, 0.4);
+  z-index: 30;
+}
+
+.club-modal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 50;
+  background: rgba(16, 16, 22, 0.4);
+}
+
+.club-modal-body {
+  background: #fff;
+  padding: 32px;
+  border-radius: var(--club-radius-lg);
+  width: min(560px, 92vw);
+  display: grid;
+  gap: 20px;
+  color: var(--club-ink);
+}
+
+.club-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.club-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.club-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #1f1f24;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  z-index: 60;
+}
+
+.club-toast.is-open {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.club-modal[hidden],
+.club-panel[hidden],
+.club-overlay[hidden] {
+  display: none;
+}
+
+.btn {
+  border: none;
+  background: var(--club-accent);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.05s ease;
+}
+
+.btn:hover {
+  background: var(--club-accent-2);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.club-btn-outline {
+  background: #fff;
+  color: var(--club-accent);
+  border: 1px solid rgba(6, 182, 212, 0.45);
+}
+
+.club-btn-outline:hover {
+  background: rgba(6, 182, 212, 0.08);
+  border-color: rgba(6, 182, 212, 0.65);
+}
+
+.club-btn-primary {
+  background: var(--club-accent);
+  color: #fff;
+  border: 1px solid transparent;
+  box-shadow: 0 8px 15px rgba(6, 182, 212, 0.35);
+}
+
+.club-btn-outline.is-active {
+  background: var(--club-accent);
+  color: #fff;
+  border-color: var(--club-accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--club-accent-2);
+  outline-offset: 2px;
+}
+
+@media (max-width: 1024px) {
+  .club-calendar-body {
+    grid-template-columns: 1fr;
+  }
+
+  .club-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .club-page .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 720px) {
+  .club-page {
+    padding: 18px;
+  }
+
+  .club-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .club-form--modal {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+.club-panel-section {
+  display: grid;
+  gap: 20px;
+}
+
+
+
+.club-admin-body section {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.club-form--modal label span {
+  font-weight: 600;
+  color: var(--club-ink);
+}
+
+
+

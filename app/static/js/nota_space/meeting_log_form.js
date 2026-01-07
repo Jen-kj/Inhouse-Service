@@ -27,7 +27,7 @@
       return;
     }
 
-    if (summaryMessage) summaryMessage.textContent = "요약을 생성 중입니다...";
+    if (summaryMessage) summaryMessage.textContent = "AI 요약을 생성하는 중...";
 
     const formData = new FormData();
     if (notes) formData.set("meeting_text", notes);
@@ -39,22 +39,27 @@
     });
 
     if (!res.ok) {
-      const fallback = "요약 생성에 실패했습니다.";
+      const fallback = "AI 요약 생성에 실패했습니다.";
+      const errorCode = data && (data.summary_error || data.error_code);
+      const message =
+        (data && data.error) ||
+        (errorCode === "OPENAI_API_KEY_MISSING"
+          ? "서버에 OPENAI_API_KEY가 설정되지 않았습니다. (instance/.env 또는 환경변수 확인)"
+          : fallback);
       if (summaryMessage) {
-        summaryMessage.textContent =
-          res.status === 502 ? fallback : (data && data.error) || fallback;
+        summaryMessage.textContent = message;
       }
       return;
     }
 
     const summaryValue = data && data.summary ? String(data.summary).trim() : "";
     if (!summaryValue) {
-      if (summaryMessage) summaryMessage.textContent = "요약 결과를 생성하지 못했습니다.";
+      if (summaryMessage) summaryMessage.textContent = "AI 요약 결과를 받지 못했습니다.";
       return;
     }
 
     setSummary(summaryValue);
-    if (summaryMessage) summaryMessage.textContent = "요약이 생성되었습니다.";
+    if (summaryMessage) summaryMessage.textContent = "AI 요약이 생성되었습니다.";
     if (summarySection) summarySection.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 })();

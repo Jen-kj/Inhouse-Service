@@ -14,6 +14,7 @@ CATEGORY_TO_TEAM = {
 
 STATUS_OPTIONS = ["PENDING", "APPROVED", "REJECTED", "COMPLETED"]
 URGENCY_OPTIONS = ["LOW", "NORMAL", "URGENT"]
+IDEA_STATUS_OPTIONS = ["새로운 제안", "검토 중", "해결 완료"]
 
 
 def _now_iso():
@@ -100,6 +101,14 @@ def init_db():
         room_count = conn.execute("SELECT COUNT(*) FROM rooms").fetchone()[0]
         if room_count == 0:
             seed_rooms(conn)
+
+        _ensure_idea_hub_schema(conn)
+        conn.commit()
+
+        idea_count = conn.execute("SELECT COUNT(*) FROM ideas").fetchone()[0]
+        if idea_count == 0:
+            seed_ideas(conn)
+            conn.commit()
 
 
 def seed_tickets(conn):
@@ -760,6 +769,358 @@ def upsert_meeting_log_entry(
                 },
             )
 
+        conn.commit()
+
+    return now
+
+
+def _ensure_idea_hub_schema(conn):
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS ideas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            content TEXT NOT NULL,
+            category TEXT,
+            author TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT '새로운 제안',
+            created_at TEXT NOT NULL,
+            completed_image TEXT,
+            completed_description TEXT
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS idea_timeline (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            idea_id INTEGER NOT NULL,
+            status TEXT NOT NULL,
+            message TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY(idea_id) REFERENCES ideas(id)
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS idea_comments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            idea_id INTEGER NOT NULL,
+            author TEXT NOT NULL,
+            comment TEXT NOT NULL,
+            rating INTEGER,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY(idea_id) REFERENCES ideas(id)
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS idea_upvotes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            idea_id INTEGER NOT NULL,
+            user_id TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            UNIQUE(idea_id, user_id),
+            FOREIGN KEY(idea_id) REFERENCES ideas(id)
+        )
+        """
+    )
+
+
+def seed_ideas(conn):
+    now = datetime.now()
+    samples = [
+        {
+            "title": "사내 스낵바에 무설탕 음료 추가",
+            "content": "제로 탄산/무설탕 음료 옵션이 조금 더 있으면 좋겠습니다. 건강 챙기면서도 간식 즐기고 싶어요!",
+            "category": "복지",
+            "author": "김민수",
+            "status": "새로운 제안",
+            "created_at": (now - timedelta(hours=2)).isoformat(timespec="seconds"),
+            "completed_image": None,
+            "completed_description": None,
+        },
+        {
+            "title": "회의실 예약 알림을 슬랙으로 보내주세요",
+            "content": "회의 시작 10분 전에 예약자/참석자에게 슬랙 알림이 가면 노쇼가 줄어들 것 같아요.",
+            "category": "시스템",
+            "author": "이지은",
+            "status": "검토 중",
+            "created_at": (now - timedelta(days=1, hours=3)).isoformat(timespec="seconds"),
+            "completed_image": None,
+            "completed_description": None,
+        },
+        {
+            "title": "온보딩 체크리스트를 좀 더 보기 쉽게",
+            "content": "신규 입사자가 해야 할 것들이 한눈에 보이도록, 카드/배지 형태로 정리되면 좋겠어요.",
+            "category": "문화",
+            "author": "최서연",
+            "status": "해결 완료",
+            "created_at": (now - timedelta(days=6, hours=6)).isoformat(timespec="seconds"),
+            "completed_image": "https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=1200&q=60",
+            "completed_description": "온보딩 페이지에 완료 상태 표시와 섹션별 구분을 추가했습니다.",
+        },
+    ]
+
+    for sample in samples:
+        row = conn.execute(
+            """
+            INSERT INTO ideas (
+                title, content, category, author, status, created_at, completed_image, completed_description
+            ) VALUES (
+                :title, :content, :category, :author, :status, :created_at, :completed_image, :completed_description
+            )
+            """,
+            sample,
+        )
+        idea_id = row.lastrowid
+
+        created_at = sample["created_at"]
+        base_time = datetime.fromisoformat(created_at)
+        review_time = (base_time + timedelta(hours=8)).isoformat(timespec="seconds")
+        done_time = (base_time + timedelta(days=3)).isoformat(timespec="seconds")
+        conn.execute(
+            """
+            INSERT INTO idea_timeline (idea_id, status, message, created_at)
+            VALUES (:idea_id, :status, :message, :created_at)
+            """,
+            {
+                "idea_id": idea_id,
+                "status": "접수 완료",
+                "message": "아이디어가 접수되었습니다.",
+                "created_at": created_at,
+            },
+        )
+
+        if sample["status"] in ("검토 중", "해결 완료"):
+            conn.execute(
+                """
+                INSERT INTO idea_timeline (idea_id, status, message, created_at)
+                VALUES (:idea_id, :status, :message, :created_at)
+                """,
+                {
+                    "idea_id": idea_id,
+                    "status": "검토 중",
+                    "message": "담당 팀에서 검토를 시작했습니다.",
+                    "created_at": review_time,
+                },
+            )
+
+        if sample["status"] == "해결 완료":
+            conn.execute(
+                """
+                INSERT INTO idea_timeline (idea_id, status, message, created_at)
+                VALUES (:idea_id, :status, :message, :created_at)
+                """,
+                {
+                    "idea_id": idea_id,
+                    "status": "해결 완료",
+                    "message": "개선 사항이 적용되었습니다.",
+                    "created_at": done_time,
+                },
+            )
+
+            conn.execute(
+                """
+                INSERT INTO idea_comments (idea_id, author, comment, rating, created_at)
+                VALUES (:idea_id, :author, :comment, :rating, :created_at)
+                """,
+                {
+                    "idea_id": idea_id,
+                    "author": "정우진",
+                    "comment": "완성도 좋고, 체크도 훨씬 쉬워졌어요!",
+                    "rating": 5,
+                    "created_at": (datetime.fromisoformat(done_time) + timedelta(hours=4)).isoformat(timespec="seconds"),
+                },
+            )
+            conn.execute(
+                """
+                INSERT INTO idea_comments (idea_id, author, comment, rating, created_at)
+                VALUES (:idea_id, :author, :comment, :rating, :created_at)
+                """,
+                {
+                    "idea_id": idea_id,
+                    "author": "박준호",
+                    "comment": "신규 입사자 입장에서 확실히 덜 헷갈려요.",
+                    "rating": 4,
+                    "created_at": (datetime.fromisoformat(done_time) + timedelta(days=1, hours=2)).isoformat(timespec="seconds"),
+                },
+            )
+
+            for user_id in ["user_001", "user_002", "user_003", "user_004"]:
+                conn.execute(
+                    """
+                    INSERT OR IGNORE INTO idea_upvotes (idea_id, user_id, created_at)
+                    VALUES (:idea_id, :user_id, :created_at)
+                    """,
+                    {"idea_id": idea_id, "user_id": user_id, "created_at": _now_iso()},
+                )
+
+
+def create_idea(title, content, category, author):
+    now = _now_iso()
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            INSERT INTO ideas (title, content, category, author, status, created_at)
+            VALUES (:title, :content, :category, :author, :status, :created_at)
+            """,
+            {
+                "title": title,
+                "content": content,
+                "category": category or None,
+                "author": author,
+                "status": "새로운 제안",
+                "created_at": now,
+            },
+        )
+        idea_id = row.lastrowid
+        conn.execute(
+            """
+            INSERT INTO idea_timeline (idea_id, status, message, created_at)
+            VALUES (:idea_id, :status, :message, :created_at)
+            """,
+            {
+                "idea_id": idea_id,
+                "status": "접수 완료",
+                "message": "아이디어가 접수되었습니다.",
+                "created_at": now,
+            },
+        )
+        conn.commit()
+    return idea_id
+
+
+def idea_exists(idea_id: int) -> bool:
+    with get_connection() as conn:
+        row = conn.execute("SELECT 1 FROM ideas WHERE id = :id", {"id": idea_id}).fetchone()
+    return bool(row)
+
+
+def _fetch_idea_timeline(conn, idea_id: int):
+    rows = conn.execute(
+        """
+        SELECT status, message, created_at
+        FROM idea_timeline
+        WHERE idea_id = :idea_id
+        ORDER BY created_at ASC
+        """,
+        {"idea_id": idea_id},
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def _fetch_idea_comments(conn, idea_id: int):
+    rows = conn.execute(
+        """
+        SELECT author, comment, rating, created_at
+        FROM idea_comments
+        WHERE idea_id = :idea_id
+        ORDER BY created_at DESC
+        """,
+        {"idea_id": idea_id},
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def fetch_ideas(status: str | None = None):
+    where_clause = ""
+    params = {}
+    if status:
+        where_clause = "WHERE i.status = :status"
+        params["status"] = status
+
+    with get_connection() as conn:
+        rows = conn.execute(
+            f"""
+            SELECT
+                i.id,
+                i.title,
+                i.content,
+                i.category,
+                i.author,
+                i.status,
+                i.created_at,
+                i.completed_image,
+                i.completed_description,
+                COALESCE(u.upvotes, 0) AS upvotes,
+                COALESCE(r.rating, 0) AS rating,
+                COALESCE(r.rating_count, 0) AS rating_count
+            FROM ideas i
+            LEFT JOIN (
+                SELECT idea_id, COUNT(*) AS upvotes
+                FROM idea_upvotes
+                GROUP BY idea_id
+            ) u ON u.idea_id = i.id
+            LEFT JOIN (
+                SELECT idea_id, AVG(rating) AS rating, COUNT(rating) AS rating_count
+                FROM idea_comments
+                WHERE rating IS NOT NULL
+                GROUP BY idea_id
+            ) r ON r.idea_id = i.id
+            {where_clause}
+            ORDER BY i.created_at DESC
+            """,
+            params,
+        ).fetchall()
+
+        result = []
+        for row in rows:
+            idea = dict(row)
+            idea["upvotes"] = int(idea.get("upvotes") or 0)
+            idea["rating"] = float(idea.get("rating") or 0)
+            idea["rating_count"] = int(idea.get("rating_count") or 0)
+            idea["timeline"] = _fetch_idea_timeline(conn, idea["id"])
+            if idea.get("status") == "해결 완료":
+                idea["comments"] = _fetch_idea_comments(conn, idea["id"])
+            result.append(idea)
+
+    return result
+
+
+def upvote_idea(idea_id: int, user_id: str):
+    now = _now_iso()
+    inserted = False
+    with get_connection() as conn:
+        try:
+            conn.execute(
+                """
+                INSERT INTO idea_upvotes (idea_id, user_id, created_at)
+                VALUES (:idea_id, :user_id, :created_at)
+                """,
+                {"idea_id": idea_id, "user_id": user_id, "created_at": now},
+            )
+            inserted = True
+            conn.commit()
+        except sqlite3.IntegrityError:
+            inserted = False
+
+        upvotes = conn.execute(
+            "SELECT COUNT(*) FROM idea_upvotes WHERE idea_id = :idea_id",
+            {"idea_id": idea_id},
+        ).fetchone()[0]
+
+    return inserted, int(upvotes)
+
+
+def add_idea_comment(idea_id: int, author: str, comment: str, rating: int | None):
+    now = _now_iso()
+    with get_connection() as conn:
+        conn.execute(
+            """
+            INSERT INTO idea_comments (idea_id, author, comment, rating, created_at)
+            VALUES (:idea_id, :author, :comment, :rating, :created_at)
+            """,
+            {
+                "idea_id": idea_id,
+                "author": author,
+                "comment": comment,
+                "rating": rating,
+                "created_at": now,
+            },
+        )
         conn.commit()
 
     return now

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% set title = "Idea Hub" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ideahub.css') }}">
+
+<div class="page idea-page" data-page="idea">
+  <header class="idea-header">
+    <div class="idea-header-title">
+      <div class="page-eyebrow">NOTA IDEA</div>
+      <h1 class="page-title">Idea Hub</h1>
+      <p class="page-subtitle">더 나은 노타를 만들기 위한 아이디어를 공유해요.</p>
+    </div>
+    <div class="idea-header-actions">
+      <button class="btn idea-btn-primary" id="submitIdeaBtn" type="button">+ 아이디어 제안하기</button>
+    </div>
+  </header>
+
+  <div class="idea-sticky">
+    <div class="idea-filters" role="tablist" aria-label="아이디어 상태 필터">
+      <button class="idea-chip is-active" data-status="" type="button">전체</button>
+      <button class="idea-chip" data-status="새로운 제안" type="button">새로운 제안</button>
+      <button class="idea-chip" data-status="검토 중" type="button">검토 중</button>
+      <button class="idea-chip" data-status="해결 완료" type="button">해결 완료</button>
+    </div>
+  </div>
+
+  <main class="idea-feed" id="ideaFeed" aria-live="polite"></main>
+</div>
+
+<div class="idea-modal" id="submitModal" aria-hidden="true">
+  <div class="idea-modal-panel" role="dialog" aria-modal="true" aria-labelledby="submitModalTitle">
+    <div class="idea-modal-header">
+      <h3 class="idea-modal-title" id="submitModalTitle">✨ 새로운 아이디어 제안</h3>
+      <button class="idea-modal-close" type="button" data-close-modal="submitModal" aria-label="닫기">×</button>
+    </div>
+    <div class="idea-modal-body">
+      <label class="idea-field">
+        <span class="idea-field-label">제목</span>
+        <input type="text" class="idea-input" id="ideaTitle" placeholder="아이디어 제목 (예: 스낵바에 무설탕 음료 추가)" autocomplete="off">
+      </label>
+      <label class="idea-field">
+        <span class="idea-field-label">내용</span>
+        <textarea class="idea-textarea" id="ideaContent" placeholder="상세 내용을 적어주세요"></textarea>
+      </label>
+      <label class="idea-field">
+        <span class="idea-field-label">카테고리</span>
+        <select class="idea-select" id="ideaCategory">
+          <option value="">카테고리 선택</option>
+          <option value="복지">복지</option>
+          <option value="시스템">시스템</option>
+          <option value="문화">문화</option>
+          <option value="시설">시설</option>
+          <option value="제도">제도</option>
+          <option value="기타">기타</option>
+        </select>
+      </label>
+      <label class="idea-field">
+        <span class="idea-field-label">이름</span>
+        <input type="text" class="idea-input" id="ideaAuthor" placeholder="이름" autocomplete="off">
+      </label>
+    </div>
+    <div class="idea-modal-actions">
+      <button class="btn idea-btn-secondary" id="cancelSubmitBtn" type="button">취소</button>
+      <button class="btn idea-btn-primary" id="confirmSubmitBtn" type="button">제안하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="idea-modal" id="commentModal" aria-hidden="true">
+  <div class="idea-modal-panel" role="dialog" aria-modal="true" aria-labelledby="commentModalTitle">
+    <div class="idea-modal-header">
+      <h3 class="idea-modal-title" id="commentModalTitle">💬 피드백 남기기</h3>
+      <button class="idea-modal-close" type="button" data-close-modal="commentModal" aria-label="닫기">×</button>
+    </div>
+    <div class="idea-modal-body">
+      <p class="idea-helper">별점과 댓글을 남겨주세요!</p>
+      <div class="idea-rating" id="ratingInput" aria-label="별점 선택">
+        <button class="idea-star" data-rating="1" type="button" aria-label="별점 1">⭐</button>
+        <button class="idea-star" data-rating="2" type="button" aria-label="별점 2">⭐</button>
+        <button class="idea-star" data-rating="3" type="button" aria-label="별점 3">⭐</button>
+        <button class="idea-star" data-rating="4" type="button" aria-label="별점 4">⭐</button>
+        <button class="idea-star" data-rating="5" type="button" aria-label="별점 5">⭐</button>
+      </div>
+      <label class="idea-field">
+        <span class="idea-field-label">댓글</span>
+        <textarea class="idea-textarea" id="commentText" placeholder="댓글을 입력하세요 (예: 정말 좋아요!)"></textarea>
+      </label>
+      <label class="idea-field">
+        <span class="idea-field-label">이름</span>
+        <input type="text" class="idea-input" id="commentAuthor" placeholder="이름" autocomplete="off">
+      </label>
+    </div>
+    <div class="idea-modal-actions">
+      <button class="btn idea-btn-secondary" id="cancelCommentBtn" type="button">취소</button>
+      <button class="btn idea-btn-primary" id="confirmCommentBtn" type="button">등록</button>
+    </div>
+  </div>
+</div>
+
+<script defer src="{{ url_for('static', filename='js/ideahub.js') }}"></script>
+{% endblock %}
