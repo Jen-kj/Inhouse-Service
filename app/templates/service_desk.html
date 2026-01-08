@@ -1,21 +1,16 @@
 ﻿{% extends "base.html" %}
 {% set title = "Service Desk" %}
 
+{% from "_page_header.html" import page_header %}
+
 {% block content %}
 <div class="page">
-  <div class="page-header">
-    <div class="page-title-block">
-      <div class="page-eyebrow">사내 요청 관리</div>
-      <h1 class="page-title">Service Desk</h1>
-      <p class="page-subtitle">사내 요청을 한곳에서 관리합니다.</p>
+  {% call page_header("사내 요청 관리", "Service Desk", "사내 요청을 한곳에서 관리합니다.") %}
+    <div class="sd-toggle" role="tablist">
+      <button class="sd-toggle-btn is-active" data-mode="category" type="button">카테고리</button>
+      <button class="sd-toggle-btn" data-mode="status" type="button">상태</button>
     </div>
-    <div class="page-header-actions">
-      <div class="sd-toggle" role="tablist">
-        <button class="sd-toggle-btn is-active" data-mode="category" type="button">카테고리</button>
-        <button class="sd-toggle-btn" data-mode="status" type="button">상태</button>
-      </div>
-    </div>
-  </div>
+  {% endcall %}
 
   <section class="sd-summary">
     <div class="sd-summary-grid" id="sd-summary-grid"></div>

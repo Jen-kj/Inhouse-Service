@@ -1,32 +1,90 @@
-.layout { display: flex; min-height: 100vh; }
+:root {
+  --layout-max-width: 1240px;
+  --layout-gutter: 18px;
+  --page-padding: 22px;
+  --page-header-gap: 18px;
+  --sticky-top: 18px;
+}
 
-.content { flex: 1; padding: 0 18px 18px; }
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--app-bg);
+}
 
+.content {
+  flex: 1;
+  padding: 0 var(--layout-gutter) var(--layout-gutter);
+}
 
+.content-inner {
+  width: 100%;
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+}
+
+/* Shared page shell */
+.page {
+  position: relative;
+  padding: 0 var(--page-padding) var(--page-padding);
+  border-radius: var(--app-radius-lg);
+  background: var(--app-bg);
+  font-family: var(--app-font);
+  color: var(--app-text);
+  min-height: calc(100vh - var(--layout-gutter));
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: var(--page-header-gap);
+}
+
+.page-title-block {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.page-eyebrow {
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  font-weight: 600;
+  color: #38bdf8;
+}
+
+.page-title {
+  margin: 6px 0 6px;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: var(--app-muted);
+}
+
+@media (max-width: 900px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Generic panel */
 .panel {
   background: #fff;
   border: 1px solid #e6e8ee;
   border-radius: 6px;
-  min-height: calc(100vh - 18px - 18px - 40px);
-}
-
-.email-row {
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.email-icon {
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 700;
-  background: #417755;
-  color: #ffffff;
-  flex: 0 0 18px;
+  min-height: calc(100vh - var(--layout-gutter) - var(--layout-gutter) - 40px);
 }

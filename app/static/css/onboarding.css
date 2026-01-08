@@ -18,16 +18,15 @@
 }
 
 .onboarding-shell {
-  margin: -18px;
-  padding: var(--spacing-5);
-  background: var(--bg);
+  margin: 0;
+  padding: 0;
+  background: transparent;
   color: var(--text);
-  min-height: calc(100vh - 0px);
 }
 
 .onboarding-container {
-  max-width: 1400px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
 }
 
 .onboarding-header {

@@ -1,20 +1,14 @@
 ﻿{% extends "base.html" %}
 {% set title = "동아리" %}
+{% from "_page_header.html" import page_header %}
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/club.css') }}">
 
 <div class="page club-page" data-page="clubs">
-  <header class="page-header">
-    <div class="page-title-block">
-      <div class="page-eyebrow">CLUBS</div>
-      <h1 class="page-title">동아리</h1>
-      <p class="page-subtitle">동아리 분위기를 한눈에 보고, 바로 가입하고 일정에 참여해보세요.</p>
-    </div>
-    <div class="page-header-actions">
-      <button class="btn club-btn-outline" id="club-create-cta" type="button">동아리 개설</button>
-    </div>
-  </header>
+  {% call page_header("CLUBS", "동아리", "동아리 분위기를 한눈에 보고, 바로 가입하고 일정에 참여해보세요.") %}
+    <button class="btn club-btn-outline" id="club-create-cta" type="button">동아리 개설</button>
+  {% endcall %}
 
   <section class="club-shell">
     <div class="club-shell-header">

@@ -1,146 +1,33 @@
-﻿const store = {
-  clubs: [
-    {
-      id: "club-tt",
-      name: "탁구",
-      category: "운동/건강",
-      tags: ["혼합 운영", "입문", "편안/유쾌"],
-      moodLine: "짧게 참여해도 좋은 실내 스포츠, 가볍게 땀 내며 친해져요",
-      memberHint: "12명",
-      snapshot: ["실내 활동", "단식·복식 모두", "점심/퇴근 후 참여"],
-      joinPolicy: "바로 가입",
-      format: "혼합 운영",
-      icon: "TT",
-      gradient: "linear-gradient(135deg, #ffb36b, #e56f4a)"
-    },
-    {
-      id: "club-bk",
-      name: "농구",
-      category: "운동/건강",
-      tags: ["정기 모임", "초중급", "경기 위주"],
-      moodLine: "팀 스포츠 특유의 호흡, 함께 뛰며 자연스럽게 가까워져요",
-      memberHint: "9명",
-      snapshot: ["경기 중심", "실내/실외 선택", "팀플 교류"],
-      joinPolicy: "바로 가입",
-      format: "정기 모임",
-      icon: "BK",
-      gradient: "linear-gradient(135deg, #5f8dff, #3843a9)"
-    },
-    {
-      id: "club-fs",
-      name: "풋살",
-      category: "운동/건강",
-      tags: ["정기 모임", "초중급", "친목 위주"],
-      moodLine: "실수해도 괜찮은 분위기, 즐겁게 뛰는 모임",
-      memberHint: "10명",
-      snapshot: ["야외 활동", "분위기 편안", "끝나고 교류"],
-      joinPolicy: "바로 가입",
-      format: "정기 모임",
-      icon: "FS",
-      gradient: "linear-gradient(135deg, #56c1a7, #1a8a72)"
-    },
-    {
-      id: "club-cl",
-      name: "클라이밍",
-      category: "운동/건강",
-      tags: ["혼합 운영", "초중급", "도전/성장"],
-      moodLine: "코스 하나씩 정복하며 서로 응원하는 도전형 스포츠",
-      memberHint: "8명",
-      snapshot: ["난이도 선택", "기록/목표 공유", "주말 활동"],
-      joinPolicy: "승인 필요",
-      format: "혼합 운영",
-      icon: "CL",
-      gradient: "linear-gradient(135deg, #7c6cff, #4b3bb4)"
-    },
-    {
-      id: "club-bg",
-      name: "보드게임",
-      category: "취미/문화",
-      tags: ["정기 모임", "상관없음", "친목 위주"],
-      moodLine: "룰은 천천히, 웃음은 크게—편하게 모여 즐겨요",
-      memberHint: "7명",
-      snapshot: ["입문자 안내", "게임 다양", "소규모 테이블"],
-      joinPolicy: "바로 가입",
-      format: "정기 모임",
-      icon: "BG",
-      gradient: "linear-gradient(135deg, #f8c86b, #b7772f)"
-    },
-    {
-      id: "club-mv",
-      name: "영화감상",
-      category: "취미/문화",
-      tags: ["정기 모임", "상관없음", "토론 중심"],
-      moodLine: "같이 보고 이야기하며 취향을 넓히는 감상 모임",
-      memberHint: "6명",
-      snapshot: ["작품 투표", "감상 후 토크", "OTT/극장 혼합"],
-      joinPolicy: "승인 필요",
-      format: "정기 모임",
-      icon: "MV",
-      gradient: "linear-gradient(135deg, #ff9aa8, #b23b5a)"
-    },
-    {
-      id: "club-bw",
-      name: "볼링",
-      category: "취미/문화",
-      tags: ["정기 모임", "입문", "편안/유쾌"],
-      moodLine: "응원과 하이파이브가 기본, 같이 치면 더 재밌어요",
-      memberHint: "11명",
-      snapshot: ["연습 + 이벤트 게임", "처음도 OK", "친목 분위기"],
-      joinPolicy: "바로 가입",
-      format: "정기 모임",
-      icon: "BW",
-      gradient: "linear-gradient(135deg, #ffbf6b, #f08a39)"
-    },
-    {
-      id: "club-ar",
-      name: "예술",
-      category: "취미/문화",
-      tags: ["정기 모임", "상관없음", "창작/표현"],
-      moodLine: "잘 그리는 것보다, 다르게 보는 법을 함께 연습해요",
-      memberHint: "5명",
-      snapshot: ["기초부터 천천히", "주제/재료 실습", "공유/피드백"],
-      joinPolicy: "승인 필요",
-      format: "정기 모임",
-      icon: "AR",
-      gradient: "linear-gradient(135deg, #69c3ff, #356fb7)"
-    }
-  ],
-  myClubs: ["탁구", "보드게임", "영화감상"],
+// Club UI - demo data is loaded from a single seed source on the server.
+
+const store = {
+  viewerUserId: null,
+  users: [],
+  clubs: [],
+  memberships: [],
+  myClubs: [],
   events: [],
-  joinApprovals: [
-    { id: "join-1", clubName: "클라이밍", applicant: "SH" },
-    { id: "join-2", clubName: "영화감상", applicant: "KR" }
-  ],
+  joinApprovals: [],
+  expenses: [],
+  posts: {},
   rsvps: {},
   pendingClubRequests: [],
-  expenses: [],
-  posts: {
-    "탁구": [
-      { id: "post-tt-1", type: "공지", title: "이번 주 실내 공간 공유" },
-      { id: "post-tt-2", type: "모집", title: "입문자 환영 세션" },
-      { id: "post-tt-3", type: "후기", title: "점심 랠리 후기" }
-    ],
-    "보드게임": [
-      { id: "post-bg-1", type: "공지", title: "룰 설명 자료 업데이트" }
-    ]
-  },
   isAdmin: false,
   ui: {
     activeTab: "discover",
     selectedCategory: "전체",
-    filters: { format: "", join: "" },
     search: "",
+    adminTab: "approvals",
+    detailTab: "overview",
     calendar: {
       monthOffset: 0,
       category: "",
       format: "",
       club: "all",
       search: "",
-      selectedDate: ""
+      selectedDate: "",
     },
-    adminTab: "approvals",
-    detailTab: "overview"
-  }
+  },
 };
 
 const refs = {
@@ -154,21 +41,19 @@ const refs = {
   grid: document.getElementById("club-grid"),
   myList: document.getElementById("club-my-list"),
   myEvents: document.getElementById("club-my-events"),
+  calendarLabel: document.getElementById("club-calendar-label"),
   calendarPrev: document.getElementById("club-calendar-prev"),
   calendarNext: document.getElementById("club-calendar-next"),
-  calendarLabel: document.getElementById("club-calendar-label"),
+  calendarView: document.getElementById("club-calendar-view"),
   calendarCategory: document.getElementById("club-calendar-category"),
   calendarFormat: document.getElementById("club-calendar-format"),
   calendarClub: document.getElementById("club-calendar-club"),
   calendarSearch: document.getElementById("club-calendar-search"),
-  calendarGrid: document.getElementById("club-calendar-grid"),
   calendarPanelTitle: document.getElementById("club-calendar-panel-title"),
   calendarPanelList: document.getElementById("club-calendar-panel-list"),
+  calendarGrid: document.getElementById("club-calendar-grid"),
+  calendarPanel: document.getElementById("club-calendar-panel"),
   calendarCreate: document.getElementById("club-calendar-create"),
-  createModal: document.getElementById("club-create-modal"),
-  createClose: document.getElementById("club-create-close"),
-  createCancel: document.getElementById("club-create-cancel"),
-  createForm: document.getElementById("club-create-form"),
   adminLocked: document.getElementById("club-admin-locked"),
   adminPanel: document.getElementById("club-admin-panel"),
   adminTabButtons: Array.from(document.querySelectorAll(".club-admin-btn")),
@@ -195,129 +80,25 @@ const refs = {
   detailPosts: document.getElementById("club-detail-posts"),
   detailEvents: document.getElementById("club-detail-events"),
   detailRequests: document.getElementById("club-detail-requests"),
+  detailAdmins: document.getElementById("club-detail-admins"),
+  detailMembers: document.getElementById("club-detail-members"),
+  detailRequestsList: document.getElementById("club-detail-requests-list"),
   modal: document.getElementById("club-modal"),
   modalTitle: document.getElementById("club-modal-title"),
   modalContent: document.getElementById("club-modal-content"),
   modalActions: document.getElementById("club-modal-actions"),
   modalClose: document.getElementById("club-modal-close"),
-  toast: document.getElementById("club-toast")
+  toast: document.getElementById("club-toast"),
+  createModal: document.getElementById("club-create-modal"),
+  createClose: document.getElementById("club-create-close"),
+  createCancel: document.getElementById("club-create-cancel"),
+  createForm: document.getElementById("club-create-form"),
 };
 
-let selectedClub = store.clubs[0];
+let selectedClub = null;
 
 function toISO(date) {
   return date.toISOString().slice(0, 10);
-}
-
-function buildEvents() {
-  const base = new Date();
-  const addDays = (days) => {
-    const d = new Date(base);
-    d.setDate(d.getDate() + days);
-    return d;
-  };
-
-  store.events = [
-    {
-      id: "evt-tt-1",
-      title: "점심 가볍게 랠리",
-      clubName: "탁구",
-      category: "운동/건강",
-      format: "혼합 운영",
-      startDate: toISO(addDays(2)),
-      endDate: toISO(addDays(2)),
-      time: "12:30",
-      place: "실내 코트",
-      description: "가볍게 랠리하고 팀 구성은 현장에서 정해요."
-    },
-    {
-      id: "evt-bk-1",
-      title: "팀플 연습 경기",
-      clubName: "농구",
-      category: "운동/건강",
-      format: "정기 모임",
-      startDate: toISO(addDays(5)),
-      endDate: toISO(addDays(5)),
-      time: "18:30",
-      place: "실외 코트",
-      description: "워밍업 후 팀을 나눠 진행합니다."
-    },
-    {
-      id: "evt-fs-1",
-      title: "퇴근 후 풋살",
-      clubName: "풋살",
-      category: "운동/건강",
-      format: "정기 모임",
-      startDate: toISO(addDays(8)),
-      endDate: toISO(addDays(8)),
-      time: "19:00",
-      place: "야외 구장",
-      description: "초중급 템포로 진행합니다."
-    },
-    {
-      id: "evt-bg-1",
-      title: "라이트 보드게임",
-      clubName: "보드게임",
-      category: "취미/문화",
-      format: "정기 모임",
-      startDate: toISO(addDays(1)),
-      endDate: toISO(addDays(1)),
-      time: "12:00",
-      place: "라운지",
-      description: "룰 설명부터 함께 시작합니다."
-    },
-    {
-      id: "evt-mv-1",
-      title: "이번 주 작품 감상",
-      clubName: "영화감상",
-      category: "취미/문화",
-      format: "정기 모임",
-      startDate: toISO(addDays(10)),
-      endDate: toISO(addDays(10)),
-      time: "16:00",
-      place: "미디어룸",
-      description: "투표로 선정한 작품을 함께 봅니다."
-    },
-    {
-      id: "evt-cl-1",
-      title: "기초 루트 챌린지",
-      clubName: "클라이밍",
-      category: "운동/건강",
-      format: "혼합 운영",
-      startDate: toISO(addDays(12)),
-      endDate: toISO(addDays(12)),
-      time: "10:00",
-      place: "클라이밍 센터",
-      description: "서로 기록을 공유하며 진행해요."
-    },
-    {
-      id: "evt-ar-1",
-      title: "드로잉 연습",
-      clubName: "예술",
-      category: "취미/문화",
-      format: "정기 모임",
-      startDate: toISO(addDays(4)),
-      endDate: toISO(addDays(6)),
-      time: "15:00",
-      place: "스튜디오",
-      description: "주제에 맞춰 같이 그립니다."
-    }
-  ];
-
-  const monthKey = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-  const thisMonth = monthKey(base);
-  const prevMonthDate = new Date(base.getFullYear(), base.getMonth() - 1, 1);
-  const prevMonth = monthKey(prevMonthDate);
-
-  store.expenses = [
-    { id: "exp-1", clubName: "탁구", month: thisMonth, title: "공간 대여", amount: 80000, note: "정산 예정" },
-    { id: "exp-2", clubName: "보드게임", month: thisMonth, title: "소모품", amount: 25000, note: "집계 중" },
-    { id: "exp-3", clubName: "탁구", month: prevMonth, title: "셔틀콕/볼", amount: 15000, note: "" }
-  ];
-}
-function setActiveTab(tab) {
-  store.ui.activeTab = tab;
-  render();
 }
 
 function showToast(message) {
@@ -327,20 +108,20 @@ function showToast(message) {
   showToast.timer = setTimeout(() => refs.toast.classList.remove("is-open"), 2000);
 }
 
-function openModal({ title, content, actions = [] }) {
-  refs.modalTitle.textContent = title;
-  refs.modalContent.innerHTML = content;
+function openModal({ title, content, actions }) {
+  refs.modalTitle.textContent = title || "알림";
+  refs.modalContent.innerHTML = content || "";
   refs.modalActions.innerHTML = "";
-  actions.forEach((action) => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.textContent = action.label;
-    btn.className = `btn ${action.className || "club-btn-outline"}`;
-    btn.addEventListener("click", () => {
+  (actions || []).forEach((action) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `btn ${action.className || "club-btn-outline"}`;
+    button.textContent = action.label;
+    button.addEventListener("click", () => {
       action.onClick?.();
       closeModal();
     });
-    refs.modalActions.appendChild(btn);
+    refs.modalActions.appendChild(button);
   });
   refs.modal.hidden = false;
 }
@@ -349,20 +130,12 @@ function closeModal() {
   refs.modal.hidden = true;
 }
 
-function openCreateModal() {
-  refs.createModal.hidden = false;
-}
-
-function closeCreateModal() {
-  refs.createModal.hidden = true;
-}
-
 function openPanel(club) {
   selectedClub = club;
   store.ui.detailTab = "overview";
-  renderDetail();
   refs.overlay.hidden = false;
   refs.panel.hidden = false;
+  renderDetail();
 }
 
 function closePanel() {
@@ -370,10 +143,21 @@ function closePanel() {
   refs.panel.hidden = true;
 }
 
+function setActiveTab(tab) {
+  store.ui.activeTab = tab;
+  render();
+}
+
+function renderTabs() {
+  refs.tabButtons.forEach((btn) => btn.classList.toggle("is-active", btn.dataset.tab === store.ui.activeTab));
+  refs.tabPanels.forEach((panel) => (panel.hidden = panel.dataset.tabPanel !== store.ui.activeTab));
+  const labelMap = { discover: "DISCOVER", my: "MY CLUBS", calendar: "CALENDAR", admin: "ADMIN" };
+  if (refs.shellMeta) refs.shellMeta.textContent = labelMap[store.ui.activeTab] || "DISCOVER";
+}
+
 function filterClubs() {
   const keyword = store.ui.search.trim();
   const category = store.ui.selectedCategory;
-
   return store.clubs.filter((club) => {
     const matchCategory = category === "전체" || club.category === category;
     const matchKeyword = !keyword || club.name.includes(keyword);
@@ -394,19 +178,18 @@ function renderClubCards(list, options = {}) {
         <article class="club-card" data-club="${club.name}">
           <h3 class="club-name">${club.name}</h3>
           <div class="club-badge ${badgeClass}">${club.category}</div>
-          <p class="club-mood">${club.moodLine}</p>
+          <p class="club-mood">${club.moodLine || ""}</p>
           <div class="club-chips">
-            <span class="club-chip-mini">${club.tags[0]}</span>
-            <span class="club-chip-mini">${club.tags[1]}</span>
-            <span class="club-chip-mini">${club.tags[2]}</span>
+            ${(club.tags || []).slice(0, 3).map((t) => `<span class="club-chip-mini">${t}</span>`).join("")}
           </div>
           <div class="club-divider"></div>
           <div class="club-card-footer">
-            <div class="club-member">👥 ${club.memberHint || "활동 중"}</div>
+            <div class="club-member">👥 ${club.memberHint || "0명"}</div>
             <div class="club-card-actions">
-              ${showJoin
-                ? '<button class="btn club-btn-primary" data-action="join" type="button">가입 신청</button>'
-                : '<button class="btn club-btn-primary" data-action="join" type="button">가입 신청</button>'
+              ${
+                showJoin
+                  ? '<button class="btn club-btn-primary" data-action="join" type="button">가입 신청</button>'
+                  : ""
               }
             </div>
           </div>
@@ -417,35 +200,33 @@ function renderClubCards(list, options = {}) {
 }
 
 function renderDiscover() {
-  refs.searchInput.value = store.ui.search;
+  if (refs.searchInput) refs.searchInput.value = store.ui.search;
   refs.categoryButtons.forEach((btn) => {
     btn.classList.toggle("is-active", btn.dataset.category === store.ui.selectedCategory);
   });
-
-  const filtered = filterClubs();
-  refs.grid.innerHTML = renderClubCards(filtered);
+  refs.grid.innerHTML = renderClubCards(filterClubs(), { showJoin: true });
 }
+
 function renderMyClubs() {
   const myClubs = store.clubs.filter((club) => store.myClubs.includes(club.name));
-  const upcoming = store.events
-    .filter((event) => store.myClubs.includes(event.clubName))
-    .slice(0, 3);
+  refs.myList.innerHTML = myClubs.length
+    ? myClubs
+        .map(
+          (club) => `
+            <div class="club-mini-card" data-club="${club.name}">
+              <div class="club-badge ${club.category === "운동/건강" ? "club-badge--sport" : "club-badge--hobby"}">${club.category}</div>
+              <div><strong>${club.name}</strong></div>
+              <div class="club-mini-actions">
+                <button class="btn club-btn-outline" data-action="detail" type="button">상세보기</button>
+                <button class="btn club-btn-primary" data-action="schedule" type="button">달력에서 보기</button>
+              </div>
+            </div>
+          `
+        )
+        .join("")
+    : '<div class="club-empty">가입한 동아리가 없습니다.</div>';
 
-  refs.myList.innerHTML = myClubs
-    .map(
-      (club) => `
-        <div class="club-mini-card" data-club="${club.name}">
-          <div class="club-badge ${club.category === "운동/건강" ? "club-badge--sport" : "club-badge--hobby"}">${club.category}</div>
-          <div><strong>${club.name}</strong></div>
-          <div class="club-mini-actions">
-            <button class="btn club-btn-outline" data-action="detail" type="button">상세보기</button>
-            <button class="btn club-btn-primary" data-action="schedule" type="button">달력에서 보기</button>
-          </div>
-        </div>
-      `
-    )
-    .join("");
-
+  const upcoming = store.events.filter((e) => store.myClubs.includes(e.clubName)).slice(0, 3);
   refs.myEvents.innerHTML = upcoming.length
     ? upcoming.map((event) => renderEventItem(event, true)).join("")
     : '<div class="club-empty">가까운 일정이 없습니다.</div>';
@@ -474,55 +255,65 @@ function getFilteredEvents() {
 }
 
 function renderCalendar() {
-  const viewDate = getCalendarDate();
-  const year = viewDate.getFullYear();
-  const month = viewDate.getMonth();
-  refs.calendarLabel.textContent = `${year}.${String(month + 1).padStart(2, "0")}`;
+  const calendarDate = getCalendarDate();
+  const year = calendarDate.getFullYear();
+  const month = calendarDate.getMonth();
 
-  refs.calendarCategory.value = store.ui.calendar.category;
-  refs.calendarFormat.value = store.ui.calendar.format;
-  refs.calendarClub.value = store.ui.calendar.club;
-  refs.calendarSearch.value = store.ui.calendar.search;
-  refs.calendarCreate.hidden = !store.isAdmin;
+  if (refs.calendarLabel) {
+    refs.calendarLabel.textContent = `${year}.${String(month + 1).padStart(2, "0")}`;
+  }
 
-  const events = getFilteredEvents().sort((a, b) => a.startDate.localeCompare(b.startDate));
-  const firstDay = new Date(year, month, 1);
-  const start = new Date(firstDay);
-  start.setDate(firstDay.getDate() - firstDay.getDay());
+  if (refs.calendarCategory) refs.calendarCategory.value = store.ui.calendar.category;
+  if (refs.calendarFormat) refs.calendarFormat.value = store.ui.calendar.format;
 
+  if (refs.calendarClub) {
+    const clubOptions = [
+      { value: "all", label: "전체" },
+      { value: "mine", label: "내 동아리" },
+      ...store.clubs.map((club) => ({ value: club.name, label: club.name })),
+    ];
+    refs.calendarClub.innerHTML = clubOptions
+      .map((opt) => `<option value="${opt.value}">${opt.label}</option>`)
+      .join("");
+    refs.calendarClub.value = store.ui.calendar.club;
+  }
+
+  if (refs.calendarSearch) refs.calendarSearch.value = store.ui.calendar.search;
+
+  const firstOfMonth = new Date(year, month, 1);
+  const start = new Date(firstOfMonth);
+  start.setDate(start.getDate() - start.getDay());
+
+  const events = getFilteredEvents();
   const cells = [];
+
   for (let i = 0; i < 42; i += 1) {
     const cellDate = new Date(start);
     cellDate.setDate(start.getDate() + i);
     const dateKey = toISO(cellDate);
-    const dayEvents = events
-      .filter((event) => event.startDate <= dateKey && event.endDate >= dateKey)
-      .map((event) => {
-        let position = "middle";
-        if (event.startDate === dateKey && event.endDate === dateKey) {
-          position = "singular";
-        } else if (event.startDate === dateKey) {
-          position = "start";
-        } else if (event.endDate === dateKey) {
-          position = "end";
-        }
-        return { ...event, position };
-      });
     const inMonth = cellDate.getMonth() === month;
     const isSelected = store.ui.calendar.selectedDate === dateKey;
-    const maxBars = 2;
-    const visibleEvents = dayEvents.slice(0, maxBars);
-    const overflowCount = Math.max(0, dayEvents.length - maxBars);
 
-    const bars = visibleEvents
+    const dayEvents = events.filter((event) => event.startDate <= dateKey && event.endDate >= dateKey);
+    const visible = dayEvents.slice(0, 3);
+    const overflowCount = Math.max(0, dayEvents.length - visible.length);
+
+    const bars = visible
       .map((event) => {
-        const categoryClass = event.category === "운동/건강" ? "is-sports" : "is-hobby";
-        return `<div class="club-event-bar ${categoryClass} ${event.position}" data-event-id="${event.id}">${event.title}</div>`;
+        const isSports = event.category === "운동/건강";
+        const segmentClass =
+          event.startDate === dateKey && event.endDate === dateKey
+            ? "singular"
+            : event.startDate === dateKey
+              ? "start"
+              : event.endDate === dateKey
+                ? "end"
+                : "middle";
+        return `<button class="club-event-bar ${isSports ? "is-sports" : "is-hobby"} ${segmentClass}" data-event-id="${event.id}" type="button">${event.title}</button>`;
       })
       .join("");
-    const more = overflowCount > 0
-      ? `<div class="club-event-bar overflow">+${overflowCount} more</div>`
-      : "";
+
+    const more = overflowCount ? `<div class="club-calendar-more">+${overflowCount} more</div>` : "";
 
     cells.push(`
       <div class="club-calendar-cell ${inMonth ? "" : "is-muted"} ${isSelected ? "is-selected" : ""}" data-date="${dateKey}">
@@ -533,295 +324,25 @@ function renderCalendar() {
     `);
   }
 
-  refs.calendarGrid.innerHTML = cells.join("");
+  if (refs.calendarGrid) refs.calendarGrid.innerHTML = cells.join("");
   renderCalendarPanel();
 }
 
 function renderCalendarPanel() {
   const selected = store.ui.calendar.selectedDate;
   if (!selected) {
-    refs.calendarPanelTitle.textContent = "날짜를 선택하세요";
-    refs.calendarPanelList.innerHTML = '<div class="club-empty">선택한 일정이 없습니다.</div>';
+    if (refs.calendarPanelTitle) refs.calendarPanelTitle.textContent = "날짜를 선택하세요";
+    if (refs.calendarPanelList) refs.calendarPanelList.innerHTML = '<div class="club-empty">선택한 일정이 없습니다.</div>';
     return;
   }
 
   const events = getFilteredEvents().filter((event) => event.startDate <= selected && event.endDate >= selected);
-  refs.calendarPanelTitle.textContent = `${selected} 일정`;
-  refs.calendarPanelList.innerHTML = events.length
-    ? events.map((event) => renderEventItem(event, true)).join("")
-    : '<div class="club-empty">해당 날짜에 일정이 없습니다.</div>';
-}
-
-function renderAdmin() {
-  refs.adminLocked.hidden = store.isAdmin;
-  refs.adminPanel.hidden = !store.isAdmin;
-
-  const availableTabs = new Set(refs.adminTabButtons.map((btn) => btn.dataset.adminTab).filter(Boolean));
-  if (!availableTabs.has(store.ui.adminTab)) {
-    store.ui.adminTab = refs.adminTabButtons[0]?.dataset.adminTab || "approvals";
+  if (refs.calendarPanelTitle) refs.calendarPanelTitle.textContent = `${selected} 일정`;
+  if (refs.calendarPanelList) {
+    refs.calendarPanelList.innerHTML = events.length
+      ? events.map((event) => renderEventItem(event, true)).join("")
+      : '<div class="club-empty">해당 날짜에 일정이 없습니다.</div>';
   }
-
-  refs.adminTabButtons.forEach((btn) => {
-    btn.classList.toggle("is-active", btn.dataset.adminTab === store.ui.adminTab);
-  });
-
-  refs.adminPanels.forEach((panel) => {
-    panel.hidden = panel.dataset.adminPanel !== store.ui.adminTab;
-  });
-
-  refs.joinApprovals.innerHTML = store.joinApprovals.length
-    ? store.joinApprovals
-        .map(
-          (item) => `
-            <div class="club-event" data-join-id="${item.id}">
-              <div>클럽: ${item.clubName}</div>
-              <div>요청자: ${item.applicant}</div>
-              <div class="club-rsvp">
-                <button class="btn club-btn-outline" data-action="approve-join" type="button">승인</button>
-                <button class="btn club-btn-outline" data-action="reject-join" type="button">반려</button>
-              </div>
-            </div>
-          `
-        )
-        .join("")
-    : '<div class="club-empty">대기 중인 요청이 없습니다.</div>';
-
-  refs.createApprovals.innerHTML = store.pendingClubRequests.length
-    ? store.pendingClubRequests
-        .map(
-          (item, index) => `
-            <div class="club-event" data-create-index="${index}">
-              <div>클럽명: ${item.name}</div>
-              <div>카테고리: ${item.category}</div>
-              <div>소개: ${item.moodLine}</div>
-              <div class="club-rsvp">
-                <button class="btn club-btn-outline" data-action="approve-create" type="button">승인</button>
-                <button class="btn club-btn-outline" data-action="reject-create" type="button">반려</button>
-              </div>
-            </div>
-          `
-        )
-        .join("")
-    : '<div class="club-empty">새로운 개설 신청이 없습니다.</div>';
-
-  const clubOptions = store.clubs.map((club) => `<option value="${club.name}">${club.name}</option>`).join("");
-  refs.postsClub.innerHTML = clubOptions;
-
-  if (refs.budgetClub) {
-    refs.budgetClub.innerHTML = clubOptions;
-  }
-
-  if (refs.budgetMonth) {
-    const months = Array.from(new Set(store.expenses.map((exp) => exp.month).filter(Boolean))).sort().reverse();
-    const monthOptions = months.length ? months : [toISO(new Date()).slice(0, 7)];
-    refs.budgetMonth.innerHTML = monthOptions.map((m) => `<option value="${m}">${m}</option>`).join("");
-  }
-
-  if (store.ui.adminTab === "budget" && refs.budgetClub && refs.budgetMonth) {
-    const selectedClub = refs.budgetClub.value || store.clubs[0]?.name;
-    const selectedMonth = refs.budgetMonth.value;
-    const expenses = store.expenses.filter(
-      (exp) => exp.clubName === selectedClub && (!selectedMonth || exp.month === selectedMonth)
-    );
-    const total = expenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
-
-    if (refs.budgetSummary) {
-      refs.budgetSummary.innerHTML = `
-        <div class="club-summary-card">지출 건수: ${expenses.length}건</div>
-        <div class="club-summary-card">총 지출: ${total.toLocaleString()}원</div>
-      `;
-    }
-
-    if (refs.expenseList) {
-      refs.expenseList.innerHTML = expenses.length
-        ? expenses
-            .map(
-              (exp) =>
-                `<div class="club-pill">${exp.title} · ${Number(exp.amount || 0).toLocaleString()}원` +
-                `${exp.note ? ` · ${exp.note}` : ""}</div>`
-            )
-            .join("")
-        : '<div class="club-empty">지출 내역이 없습니다.</div>';
-    }
-  }
-
-  const selectedPosts = refs.postsClub.value || store.clubs[0]?.name;
-  const posts = store.posts[selectedPosts] || [];
-  refs.postsList.innerHTML = posts.length
-    ? posts
-        .map(
-          (post) => `
-            <div class="club-event" data-post-id="${post.id}">
-              <div>${post.type} · ${post.title}</div>
-              <div class="club-rsvp">
-                <button class="btn club-btn-outline" data-action="edit-post" type="button">편집</button>
-                <button class="btn club-btn-outline" data-action="delete-post" type="button">삭제</button>
-              </div>
-            </div>
-          `
-        )
-        .join("")
-    : '<div class="club-empty">작성된 글이 없습니다.</div>';
-}
-
-function renderDetail() {
-  const club = selectedClub;
-  const availableTabs = new Set(refs.panelTabs.map((tab) => tab.dataset.panelTab).filter(Boolean));
-  if (!availableTabs.has(store.ui.detailTab)) {
-    store.ui.detailTab = "overview";
-  }
-
-  refs.detailTitle.textContent = club.name;
-  refs.detailCategory.textContent = club.category;
-  refs.detailCategory.classList.remove("club-badge--sport", "club-badge--hobby");
-  refs.detailCategory.classList.add(
-    club.category === "운동/건강" ? "club-badge--sport" : "club-badge--hobby"
-  );
-  refs.detailTags.textContent = `운영 방식: ${club.tags.join(" / ")}`;
-  refs.detailJoin.textContent = club.joinPolicy === "바로 가입" ? "가입하기" : "가입 요청";
-
-  refs.panelTabs.forEach((tab) => {
-    const isActive = tab.dataset.panelTab === store.ui.detailTab;
-    tab.classList.toggle("is-active", isActive);
-  });
-
-  refs.panelSections.forEach((section) => {
-    section.hidden = section.dataset.panelSection !== store.ui.detailTab;
-  });
-
-  refs.detailRequests.hidden = !(store.isAdmin && club.joinPolicy === "승인 필요");
-
-  const posts = (store.posts[club.name] || []).slice(0, 3);
-  refs.detailPosts.innerHTML = posts.length
-    ? posts.map((post) => `<div class="club-pill">${post.type} · ${post.title}</div>`).join("")
-    : '<div class="club-empty">등록된 글이 없습니다.</div>';
-
-  const clubEvents = store.events.filter((event) => event.clubName === club.name);
-  refs.detailEvents.innerHTML = clubEvents.length
-    ? clubEvents.map((event) => renderEventItem(event, true)).join("")
-    : '<div class="club-empty">예정된 일정이 없습니다.</div>';
-}
-
-function renderEventItem(event, includeRsvp) {
-  const status = store.rsvps[event.id] || "";
-  const meta = [event.startDate, event.time, event.clubName].filter(Boolean).join(" · ");
-  return `
-    <div class="club-event" data-event-id="${event.id}">
-      <div class="club-event-main">
-        <div><strong>${event.title}</strong></div>
-        <div class="club-event-meta">${meta}</div>
-      </div>
-      ${includeRsvp ? `
-        <div class="club-rsvp">
-          ${["참여", "불참"].map((label) => `
-            <button class="btn club-btn-outline ${status === label ? "is-active" : ""}" data-rsvp="${label}" type="button">${label}</button>
-          `).join("")}
-        </div>
-      ` : ""}
-    </div>
-  `;
-}
-
-function renderTabs() {
-  refs.tabButtons.forEach((btn) => {
-    btn.classList.toggle("is-active", btn.dataset.tab === store.ui.activeTab);
-  });
-
-  refs.tabPanels.forEach((panel) => {
-    panel.hidden = panel.dataset.tabPanel !== store.ui.activeTab;
-  });
-
-  const labelMap = {
-    discover: "DISCOVER",
-    my: "MY CLUBS",
-    calendar: "CALENDAR",
-    admin: "ADMIN"
-  };
-  refs.shellMeta.textContent = labelMap[store.ui.activeTab] || "DISCOVER";
-}
-
-function render() {
-  renderTabs();
-  if (store.ui.activeTab === "discover") {
-    renderDiscover();
-  }
-  if (store.ui.activeTab === "my") {
-    renderMyClubs();
-  }
-  if (store.ui.activeTab === "calendar") {
-    renderCalendar();
-  }
-  if (store.ui.activeTab === "admin") {
-    renderAdmin();
-  }
-  renderDetail();
-}
-
-function approveJoin(id) {
-  store.joinApprovals = store.joinApprovals.filter((item) => item.id !== id);
-  showToast("가입 승인 완료");
-  renderAdmin();
-}
-
-function rejectJoin(id) {
-  openModal({
-    title: "반려 사유",
-    content: '<textarea id="club-reject-reason" rows="3" style="width:100%" placeholder="사유 입력"></textarea>',
-    actions: [
-      {
-        label: "반려",
-        className: "club-btn-primary",
-        onClick: () => {
-          store.joinApprovals = store.joinApprovals.filter((item) => item.id !== id);
-          showToast("가입 요청 반려됨");
-          renderAdmin();
-        }
-      }
-    ]
-  });
-}
-
-function approveCreate(index) {
-  const request = store.pendingClubRequests.splice(index, 1)[0];
-  if (!request) return;
-
-  const vibeByCategory = {
-    "운동/건강": "도전/성장",
-    "취미/문화": "창작/표현"
-  };
-
-  store.clubs.push({
-    name: request.name,
-    category: request.category,
-    tags: [request.format, "입문", vibeByCategory[request.category] || "편안/유쾌"],
-    moodLine: request.moodLine,
-    snapshot: ["신규 제안", "입문자 환영", "자율 참여"],
-    joinPolicy: request.joinPolicy,
-    format: request.format,
-    icon: request.name.slice(0, 2).toUpperCase(),
-    gradient: "linear-gradient(135deg, #6db2ff, #375a9e)"
-  });
-
-  showToast("개설 신청 승인됨");
-  render();
-}
-
-function rejectCreate(index) {
-  openModal({
-    title: "반려 사유",
-    content: '<textarea rows="3" style="width:100%" placeholder="사유 입력"></textarea>',
-    actions: [
-      {
-        label: "반려",
-        className: "club-btn-primary",
-        onClick: () => {
-          store.pendingClubRequests.splice(index, 1);
-          showToast("개설 신청 반려됨");
-          renderAdmin();
-        }
-      }
-    ]
-  });
 }
 
 function openEventModal(event) {
@@ -843,7 +364,7 @@ function openEventModal(event) {
           store.rsvps[event.id] = "참여";
           showToast("RSVP: 참여");
           render();
-        }
+        },
       },
       {
         label: "불참",
@@ -852,104 +373,260 @@ function openEventModal(event) {
           store.rsvps[event.id] = "불참";
           showToast("RSVP: 불참");
           render();
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
 }
 
-function openCreateEventModal(dateValue) {
+function renderAdmin() {
+  if (!refs.adminToggle) return;
+  refs.adminLocked.hidden = store.isAdmin;
+  refs.adminPanel.hidden = !store.isAdmin;
+
+  const availableTabs = new Set(refs.adminTabButtons.map((btn) => btn.dataset.adminTab).filter(Boolean));
+  if (!availableTabs.has(store.ui.adminTab)) {
+    store.ui.adminTab = refs.adminTabButtons[0]?.dataset.adminTab || "approvals";
+  }
+
+  refs.adminTabButtons.forEach((btn) => btn.classList.toggle("is-active", btn.dataset.adminTab === store.ui.adminTab));
+  refs.adminPanels.forEach((panel) => (panel.hidden = panel.dataset.adminPanel !== store.ui.adminTab));
+
+  if (refs.joinApprovals) {
+    refs.joinApprovals.innerHTML = store.joinApprovals.length
+      ? store.joinApprovals
+          .map(
+            (item) => `
+              <div class="club-event" data-join-id="${item.id}">
+                <div>클럽: ${item.clubName}</div>
+                <div>요청자: ${item.applicant}</div>
+                <div class="club-rsvp">
+                  <button class="btn club-btn-outline" data-action="approve-join" type="button">승인</button>
+                  <button class="btn club-btn-outline" data-action="reject-join" type="button">반려</button>
+                </div>
+              </div>
+            `
+          )
+          .join("")
+      : '<div class="club-empty">대기 중인 요청이 없습니다.</div>';
+  }
+
+  if (refs.createApprovals) {
+    refs.createApprovals.innerHTML = store.pendingClubRequests.length
+      ? store.pendingClubRequests
+          .map(
+            (item, index) => `
+              <div class="club-event" data-create-index="${index}">
+                <div>클럽명: ${item.name}</div>
+                <div>카테고리: ${item.category}</div>
+                <div>소개: ${item.moodLine}</div>
+                <div class="club-rsvp">
+                  <button class="btn club-btn-outline" data-action="approve-create" type="button">승인</button>
+                  <button class="btn club-btn-outline" data-action="reject-create" type="button">반려</button>
+                </div>
+              </div>
+            `
+          )
+          .join("")
+      : '<div class="club-empty">새로운 개설 신청이 없습니다.</div>';
+  }
+
   const clubOptions = store.clubs.map((club) => `<option value="${club.name}">${club.name}</option>`).join("");
-  openModal({
-    title: "이벤트 생성",
-    content: `
-      <div style="display:grid;gap:10px;">
-        <label>날짜<input id="club-event-date" type="date" value="${dateValue}" style="width:100%" /></label>
-        <label>시간<input id="club-event-time" type="time" style="width:100%" /></label>
-        <label>동아리<select id="club-event-club" style="width:100%">${clubOptions}</select></label>
-        <label>형태<select id="club-event-format" style="width:100%">
-          <option value="정기 모임">정기 모임</option>
-          <option value="번개 중심">번개 중심</option>
-          <option value="혼합 운영">혼합 운영</option>
-        </select></label>
-        <label>장소<input id="club-event-place" type="text" style="width:100%" /></label>
-        <label>설명<textarea id="club-event-desc" rows="3" style="width:100%"></textarea></label>
-      </div>
-    `,
-    actions: [
-      {
-        label: "저장",
-        className: "club-btn-primary",
-        onClick: () => {
-          const date = document.getElementById("club-event-date").value;
-          const time = document.getElementById("club-event-time").value;
-          const clubName = document.getElementById("club-event-club").value;
-        const format = document.getElementById("club-event-format").value;
-        const place = document.getElementById("club-event-place").value;
-        const description = document.getElementById("club-event-desc").value;
-        const club = store.clubs.find((item) => item.name === clubName);
-        if (!date || !club) return;
 
-        store.events.push({
-          id: `evt-${Date.now()}`,
-          title: "신규 이벤트",
-          clubName,
-          category: club.category,
-          format,
-          startDate: date,
-          endDate: date,
-          time,
-          place,
-          description
-        });
+  if (refs.postsClub) refs.postsClub.innerHTML = clubOptions;
+  if (refs.budgetClub) refs.budgetClub.innerHTML = clubOptions;
 
-          store.ui.calendar.selectedDate = date;
-          renderCalendar();
-          showToast("이벤트 생성 완료");
-        }
-      }
-    ]
-  });
+  if (refs.budgetMonth) {
+    const months = Array.from(new Set(store.expenses.map((exp) => exp.month).filter(Boolean))).sort().reverse();
+    refs.budgetMonth.innerHTML = months.map((m) => `<option value="${m}">${m}</option>`).join("");
+  }
+
+  if (store.ui.adminTab === "budget" && refs.budgetClub && refs.budgetMonth) {
+    const selectedClubName = refs.budgetClub.value || store.clubs[0]?.name;
+    const selectedMonth = refs.budgetMonth.value;
+    const expenses = store.expenses.filter(
+      (exp) => exp.clubName === selectedClubName && (!selectedMonth || exp.month === selectedMonth)
+    );
+    const total = expenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
+
+    if (refs.budgetSummary) {
+      refs.budgetSummary.innerHTML = `
+        <div class="club-summary-card">지출 건수: ${expenses.length}건</div>
+        <div class="club-summary-card">총 지출: ${total.toLocaleString()}원</div>
+      `;
+    }
+
+    if (refs.expenseList) {
+      refs.expenseList.innerHTML = expenses.length
+        ? expenses
+            .map(
+              (exp) =>
+                `<div class="club-pill">${exp.title} · ${Number(exp.amount || 0).toLocaleString()}원${
+                  exp.note ? ` · ${exp.note}` : ""
+                }</div>`
+            )
+            .join("")
+        : '<div class="club-empty">지출 내역이 없습니다.</div>';
+    }
+  }
+
+  if (store.ui.adminTab === "posts" && refs.postsClub && refs.postsList) {
+    const selectedPosts = refs.postsClub.value || store.clubs[0]?.name;
+    const posts = store.posts[selectedPosts] || [];
+    refs.postsList.innerHTML = posts.length
+      ? posts
+          .map(
+            (post) => `
+              <div class="club-event" data-post-id="${post.id}">
+                <div>${post.type} · ${post.title}</div>
+                <div class="club-rsvp">
+                  <button class="btn club-btn-outline" data-action="delete-post" type="button">삭제</button>
+                </div>
+              </div>
+            `
+          )
+          .join("")
+      : '<div class="club-empty">작성된 글이 없습니다.</div>';
+  }
 }
-function init() {
-  refs.modal.hidden = true;
-  refs.panel.hidden = true;
-  refs.overlay.hidden = true;
-  refs.createModal.hidden = true;
 
-  buildEvents();
+function renderDetail() {
+  if (!selectedClub) return;
 
-  store.ui.calendar.selectedDate = toISO(new Date());
+  const availableTabs = new Set(refs.panelTabs.map((tab) => tab.dataset.panelTab).filter(Boolean));
+  if (!availableTabs.has(store.ui.detailTab)) store.ui.detailTab = "overview";
 
-  refs.tabButtons.forEach((btn) => {
-    btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
-  });
+  const userById = new Map(store.users.map((user) => [user.id, user]));
+  const memberships = store.memberships.filter((m) => m.club_id === selectedClub.id);
+  const adminMembers = memberships.filter((m) => m.status === "active" && m.role === "admin");
+  const activeMembers = memberships.filter((m) => m.status === "active" && m.role !== "admin");
+  const pendingMembers = memberships.filter((m) => m.status === "pending");
 
-  refs.createCta.addEventListener("click", openCreateModal);
-  refs.createClose.addEventListener("click", closeCreateModal);
-  refs.createCancel.addEventListener("click", closeCreateModal);
+  refs.detailTitle.textContent = selectedClub.name;
+  refs.detailCategory.textContent = selectedClub.category;
+  refs.detailCategory.classList.remove("club-badge--sport", "club-badge--hobby");
+  refs.detailCategory.classList.add(selectedClub.category === "운동/건강" ? "club-badge--sport" : "club-badge--hobby");
+  refs.detailTags.textContent = `운영 방식: ${(selectedClub.tags || []).join(" / ")}`;
+  refs.detailJoin.textContent = selectedClub.joinPolicy === "바로 가입" ? "가입하기" : "가입 요청";
 
-  refs.adminToggle.addEventListener("change", (event) => {
-    store.isAdmin = event.target.checked;
-    render();
-  });
+  refs.panelTabs.forEach((tab) => tab.classList.toggle("is-active", tab.dataset.panelTab === store.ui.detailTab));
+  refs.panelSections.forEach((section) => (section.hidden = section.dataset.panelSection !== store.ui.detailTab));
 
-  refs.searchInput.addEventListener("input", (event) => {
+  refs.detailRequests.hidden = !(store.isAdmin && selectedClub.joinPolicy === "승인 필요");
+
+  if (refs.detailAdmins) {
+    refs.detailAdmins.innerHTML = adminMembers.length
+      ? adminMembers
+          .map((m) => `<div class="club-pill">운영진 - ${userById.get(m.user_id)?.name || m.user_id}</div>`)
+          .join("")
+      : '<div class="club-empty">운영진 정보가 없습니다.</div>';
+  }
+
+  if (refs.detailMembers) {
+    refs.detailMembers.innerHTML = activeMembers.length
+      ? activeMembers
+          .map((m) => `<div class="club-pill">멤버 - ${userById.get(m.user_id)?.name || m.user_id}</div>`)
+          .join("")
+      : '<div class="club-empty">멤버가 없습니다.</div>';
+  }
+
+  if (refs.detailRequestsList) {
+    refs.detailRequestsList.innerHTML = pendingMembers.length
+      ? pendingMembers
+          .map((m) => `<div class="club-pill">신청자 - ${userById.get(m.user_id)?.name || m.user_id}</div>`)
+          .join("")
+      : '<div class="club-empty">대기 중인 요청이 없습니다.</div>';
+  }
+
+  const posts = (store.posts[selectedClub.name] || []).slice(0, 3);
+  refs.detailPosts.innerHTML = posts.length
+    ? posts.map((p) => `<div class="club-pill">${p.type} · ${p.title}</div>`).join("")
+    : '<div class="club-empty">등록된 글이 없습니다.</div>';
+
+  const clubEvents = store.events.filter((event) => event.clubName === selectedClub.name);
+  refs.detailEvents.innerHTML = clubEvents.length
+    ? clubEvents.map((event) => renderEventItem(event, true)).join("")
+    : '<div class="club-empty">예정된 일정이 없습니다.</div>';
+}
+
+function renderEventItem(event, includeRsvp) {
+  const status = store.rsvps[event.id] || "";
+  const meta = [event.startDate, event.time, event.clubName].filter(Boolean).join(" · ");
+  return `
+    <div class="club-event" data-event-id="${event.id}">
+      <div class="club-event-main">
+        <div><strong>${event.title}</strong></div>
+        <div class="club-event-meta">${meta}</div>
+      </div>
+      ${
+        includeRsvp
+          ? `<div class="club-rsvp">
+              ${["참여", "불참"]
+                .map(
+                  (label) =>
+                    `<button class="btn club-btn-outline ${status === label ? "is-active" : ""}" data-rsvp="${label}" type="button">${label}</button>`
+                )
+                .join("")}
+            </div>`
+          : ""
+      }
+    </div>
+  `;
+}
+
+function render() {
+  renderTabs();
+  if (store.ui.activeTab === "discover") renderDiscover();
+  if (store.ui.activeTab === "my") renderMyClubs();
+  if (store.ui.activeTab === "calendar") renderCalendar();
+  if (store.ui.activeTab === "admin") renderAdmin();
+  renderDetail();
+}
+
+async function loadSeed() {
+  const response = await fetch("/api/clubs/seed");
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const data = await response.json();
+
+  store.viewerUserId = data.viewer_user_id || null;
+  store.users = Array.isArray(data.users) ? data.users : [];
+  store.clubs = Array.isArray(data.clubs) ? data.clubs : [];
+  store.memberships = Array.isArray(data.memberships) ? data.memberships : [];
+  store.myClubs = Array.isArray(data.myClubs) ? data.myClubs : [];
+  store.events = Array.isArray(data.events) ? data.events : [];
+  store.joinApprovals = Array.isArray(data.joinApprovals) ? data.joinApprovals : [];
+  store.posts = data.posts && typeof data.posts === "object" ? data.posts : {};
+  store.expenses = Array.isArray(data.expenses) ? data.expenses : [];
+
+  selectedClub = store.clubs[0] || null;
+}
+
+  async function init() {
+  try {
+    await loadSeed();
+  } catch (error) {
+    console.error("Failed to load club seed:", error);
+    showToast("동아리 데이터를 불러오지 못했습니다.");
+  }
+
+  refs.tabButtons.forEach((btn) => btn.addEventListener("click", () => setActiveTab(btn.dataset.tab)));
+
+  refs.categoryButtons.forEach((btn) =>
+    btn.addEventListener("click", () => {
+      store.ui.selectedCategory = btn.dataset.category;
+      renderDiscover();
+    })
+  );
+
+  refs.searchInput?.addEventListener("input", (event) => {
     store.ui.search = event.target.value;
     renderDiscover();
   });
 
-  refs.categoryButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      store.ui.selectedCategory = btn.dataset.category;
-      renderDiscover();
-    });
-  });
-
-  refs.grid.addEventListener("click", (event) => {
+  refs.grid?.addEventListener("click", (event) => {
     const card = event.target.closest(".club-card");
     if (!card) return;
-    const club = store.clubs.find((item) => item.name === card.dataset.club);
+    const club = store.clubs.find((c) => c.name === card.dataset.club);
     if (!club) return;
 
     if (event.target.dataset.action === "join") {
@@ -961,179 +638,85 @@ function init() {
     openPanel(club);
   });
 
-  refs.myList.addEventListener("click", (event) => {
+  refs.myList?.addEventListener("click", (event) => {
     const card = event.target.closest("[data-club]");
     if (!card) return;
-    const club = store.clubs.find((item) => item.name === card.dataset.club);
+    const club = store.clubs.find((c) => c.name === card.dataset.club);
     if (!club) return;
-
-    if (event.target.dataset.action === "detail") {
-      openPanel(club);
-    }
     if (event.target.dataset.action === "schedule") {
       store.ui.calendar.club = club.name;
       store.ui.activeTab = "calendar";
+      store.ui.calendar.selectedDate = "";
       render();
-    }
-  });
-
-  refs.calendarPrev.addEventListener("click", () => {
-    store.ui.calendar.monthOffset -= 1;
-    renderCalendar();
-  });
-
-  refs.calendarNext.addEventListener("click", () => {
-    store.ui.calendar.monthOffset += 1;
-    renderCalendar();
-  });
-
-  refs.calendarCategory.addEventListener("change", (event) => {
-    store.ui.calendar.category = event.target.value;
-    renderCalendar();
-  });
-
-  refs.calendarFormat.addEventListener("change", (event) => {
-    store.ui.calendar.format = event.target.value;
-    renderCalendar();
-  });
-
-  refs.calendarClub.addEventListener("change", (event) => {
-    store.ui.calendar.club = event.target.value;
-    renderCalendar();
-  });
-
-  refs.calendarSearch.addEventListener("input", (event) => {
-    store.ui.calendar.search = event.target.value;
-    renderCalendar();
-  });
-
-  refs.calendarGrid.addEventListener("click", (event) => {
-    const bar = event.target.closest(".club-event-bar");
-    if (bar && !bar.classList.contains("overflow")) {
-      const eventData = store.events.find((item) => item.id === bar.dataset.eventId);
-      if (eventData) {
-        openEventModal(eventData);
-      }
       return;
     }
-
-    const cell = event.target.closest(".club-calendar-cell");
-    if (!cell) return;
-    store.ui.calendar.selectedDate = cell.dataset.date;
-    renderCalendar();
+    openPanel(club);
   });
 
-  refs.calendarPanelList.addEventListener("click", handleRsvpClick);
-  refs.myEvents.addEventListener("click", handleRsvpClick);
-  refs.detailEvents.addEventListener("click", handleRsvpClick);
+  refs.panelTabs.forEach((tab) =>
+    tab.addEventListener("click", () => {
+      store.ui.detailTab = tab.dataset.panelTab;
+      renderDetail();
+    })
+  );
 
-  refs.calendarCreate.addEventListener("click", () => {
-    const dateValue = store.ui.calendar.selectedDate || toISO(new Date());
-    openCreateEventModal(dateValue);
+  refs.detailJoin?.addEventListener("click", () => {
+    if (!selectedClub) return;
+    const msg = selectedClub.joinPolicy === "바로 가입" ? "가입 완료" : "가입 요청 완료";
+    showToast(msg);
   });
 
-  refs.createForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const formData = new FormData(refs.createForm);
-    const request = {
-      name: formData.get("name").trim(),
-      category: formData.get("category"),
-      moodLine: formData.get("moodLine").trim(),
-      format: formData.get("format"),
-      joinPolicy: formData.get("joinPolicy"),
-      schedule: formData.get("schedule").trim(),
-      place: formData.get("place"),
-      slack: formData.get("slack").trim(),
-      flashOnly: formData.get("flashOnly") === "on"
-    };
+  refs.panelClose?.addEventListener("click", closePanel);
+  refs.overlay?.addEventListener("click", closePanel);
 
-    store.pendingClubRequests.push(request);
-    refs.createForm.reset();
-    closeCreateModal();
-    showToast("신청 완료");
-    if (store.isAdmin) {
-      renderAdmin();
-    }
+  refs.adminToggle?.addEventListener("change", (event) => {
+    store.isAdmin = Boolean(event.target.checked);
+    renderAdmin();
   });
 
-  refs.adminTabButtons.forEach((btn) => {
+  refs.adminTabButtons.forEach((btn) =>
     btn.addEventListener("click", () => {
       store.ui.adminTab = btn.dataset.adminTab;
       renderAdmin();
-    });
-  });
+    })
+  );
 
-  refs.joinApprovals.addEventListener("click", (event) => {
-    const card = event.target.closest("[data-join-id]");
-    if (!card) return;
+  refs.joinApprovals?.addEventListener("click", (event) => {
+    const row = event.target.closest("[data-join-id]");
+    if (!row) return;
     if (event.target.dataset.action === "approve-join") {
-      approveJoin(card.dataset.joinId);
+      store.joinApprovals = store.joinApprovals.filter((j) => j.id !== row.dataset.joinId);
+      showToast("가입 승인 완료");
+      renderAdmin();
     }
     if (event.target.dataset.action === "reject-join") {
-      rejectJoin(card.dataset.joinId);
+      showToast("가입 요청 반려됨");
+      store.joinApprovals = store.joinApprovals.filter((j) => j.id !== row.dataset.joinId);
+      renderAdmin();
     }
   });
 
-  refs.createApprovals.addEventListener("click", (event) => {
-    const card = event.target.closest("[data-create-index]");
-    if (!card) return;
-    const index = Number(card.dataset.createIndex);
-    if (event.target.dataset.action === "approve-create") {
-      approveCreate(index);
-    }
-    if (event.target.dataset.action === "reject-create") {
-      rejectCreate(index);
+  refs.postsList?.addEventListener("click", (event) => {
+    const row = event.target.closest("[data-post-id]");
+    if (!row) return;
+    if (event.target.dataset.action === "delete-post") {
+      const clubName = refs.postsClub.value;
+      store.posts[clubName] = (store.posts[clubName] || []).filter((p) => p.id !== row.dataset.postId);
+      renderAdmin();
     }
   });
 
-  if (refs.expenseAdd) {
-    refs.expenseAdd.addEventListener("click", () => {
-      if (!refs.budgetClub || !refs.budgetMonth) return;
-      openModal({
-        title: "지출 추가",
-        content:
-          '<input id="club-expense-title" type="text" placeholder="항목" style="width:100%;margin-bottom:8px;" />' +
-          '<input id="club-expense-amount" type="number" inputmode="numeric" placeholder="금액" style="width:100%;margin-bottom:8px;" />' +
-          '<input id="club-expense-note" type="text" placeholder="메모 (옵션)" style="width:100%" />',
-        actions: [
-          {
-            label: "저장",
-            className: "club-btn-primary",
-            onClick: () => {
-              const title = document.getElementById("club-expense-title").value.trim();
-              const amountValue = Number(document.getElementById("club-expense-amount").value);
-              const note = document.getElementById("club-expense-note").value.trim();
-              if (!title || !Number.isFinite(amountValue) || amountValue <= 0) return;
-              store.expenses.push({
-                id: `exp-${Date.now()}`,
-                clubName: refs.budgetClub.value,
-                month: refs.budgetMonth.value,
-                title,
-                amount: amountValue,
-                note
-              });
-              renderAdmin();
-            }
-          }
-        ]
-      });
-    });
-  }
-
-  if (refs.budgetClub) refs.budgetClub.addEventListener("change", renderAdmin);
-  if (refs.budgetMonth) refs.budgetMonth.addEventListener("change", renderAdmin);
-  refs.postsClub.addEventListener("change", renderAdmin);
-
-  refs.postsAdd.addEventListener("click", () => {
+  refs.postsAdd?.addEventListener("click", () => {
     const clubName = refs.postsClub.value;
     openModal({
       title: "글 작성",
-      content: '<input id="club-post-title" type="text" placeholder="제목" style="width:100%;margin-bottom:8px;" />' +
+      content:
+        '<input id="club-post-title" type="text" placeholder="제목" style="width:100%;margin-bottom:8px;" />' +
         '<select id="club-post-type" style="width:100%">' +
         '<option value="공지">공지</option>' +
         '<option value="모집">모집</option>' +
         '<option value="후기">후기</option>' +
-        '</select>',
+        "</select>",
       actions: [
         {
           label: "등록",
@@ -1145,107 +728,130 @@ function init() {
             store.posts[clubName] = store.posts[clubName] || [];
             store.posts[clubName].unshift({ id: `post-${Date.now()}`, type, title });
             renderAdmin();
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
   });
 
-  refs.postsList.addEventListener("click", (event) => {
-    const card = event.target.closest("[data-post-id]");
+  refs.expenseAdd?.addEventListener("click", () => {
+    if (!refs.budgetClub || !refs.budgetMonth) return;
+    openModal({
+      title: "지출 추가",
+      content:
+        '<input id="club-expense-title" type="text" placeholder="항목" style="width:100%;margin-bottom:8px;" />' +
+        '<input id="club-expense-amount" type="number" inputmode="numeric" placeholder="금액" style="width:100%;margin-bottom:8px;" />' +
+        '<input id="club-expense-note" type="text" placeholder="메모 (옵션)" style="width:100%" />',
+      actions: [
+        {
+          label: "저장",
+          className: "club-btn-primary",
+          onClick: () => {
+            const title = document.getElementById("club-expense-title").value.trim();
+            const amountValue = Number(document.getElementById("club-expense-amount").value);
+            const note = document.getElementById("club-expense-note").value.trim();
+            if (!title || !Number.isFinite(amountValue) || amountValue <= 0) return;
+            store.expenses.push({
+              id: `exp-${Date.now()}`,
+              clubName: refs.budgetClub.value,
+              month: refs.budgetMonth.value,
+              title,
+              amount: amountValue,
+              note,
+            });
+            renderAdmin();
+          },
+        },
+      ],
+    });
+  });
+
+  refs.budgetClub?.addEventListener("change", renderAdmin);
+  refs.budgetMonth?.addEventListener("change", renderAdmin);
+
+  document.addEventListener("click", (event) => {
+    const btn = event.target.closest("button[data-rsvp]");
+    if (!btn) return;
+    const card = event.target.closest("[data-event-id]");
     if (!card) return;
-    const clubName = refs.postsClub.value;
-    const posts = store.posts[clubName] || [];
-    const post = posts.find((item) => item.id === card.dataset.postId);
-    if (!post) return;
+    store.rsvps[card.dataset.eventId] = btn.dataset.rsvp;
+    showToast(`RSVP: ${btn.dataset.rsvp}`);
+    render();
+  });
 
-    if (event.target.dataset.action === "delete-post") {
-      store.posts[clubName] = posts.filter((item) => item.id !== post.id);
-      renderAdmin();
+  refs.calendarPrev?.addEventListener("click", () => {
+    store.ui.calendar.monthOffset -= 1;
+    renderCalendar();
+  });
+
+  refs.calendarNext?.addEventListener("click", () => {
+    store.ui.calendar.monthOffset += 1;
+    renderCalendar();
+  });
+
+  refs.calendarCategory?.addEventListener("change", (event) => {
+    store.ui.calendar.category = event.target.value;
+    renderCalendar();
+  });
+
+  refs.calendarFormat?.addEventListener("change", (event) => {
+    store.ui.calendar.format = event.target.value;
+    renderCalendar();
+  });
+
+  refs.calendarClub?.addEventListener("change", (event) => {
+    store.ui.calendar.club = event.target.value;
+    renderCalendar();
+  });
+
+  refs.calendarSearch?.addEventListener("input", (event) => {
+    store.ui.calendar.search = event.target.value;
+    renderCalendar();
+  });
+
+  refs.calendarGrid?.addEventListener("click", (event) => {
+    const bar = event.target.closest(".club-event-bar");
+    if (bar) {
+      const eventData = store.events.find((item) => item.id === bar.dataset.eventId);
+      if (eventData) openEventModal(eventData);
+      return;
     }
-
-    if (event.target.dataset.action === "edit-post") {
-      openModal({
-        title: "글 편집",
-        content: `<input id="club-post-title" type="text" value="${post.title}" style="width:100%;margin-bottom:8px;" />` +
-          `<select id="club-post-type" style="width:100%">` +
-          `<option value="공지" ${post.type === "공지" ? "selected" : ""}>공지</option>` +
-          `<option value="모집" ${post.type === "모집" ? "selected" : ""}>모집</option>` +
-          `<option value="후기" ${post.type === "후기" ? "selected" : ""}>후기</option>` +
-          `</select>`,
-        actions: [
-          {
-            label: "저장",
-            className: "club-btn-primary",
-            onClick: () => {
-              post.title = document.getElementById("club-post-title").value.trim();
-              post.type = document.getElementById("club-post-type").value;
-              renderAdmin();
-            }
-          }
-        ]
-      });
-    }
+    const cell = event.target.closest(".club-calendar-cell");
+    if (!cell) return;
+    store.ui.calendar.selectedDate = cell.dataset.date;
+    renderCalendarPanel();
   });
 
-  refs.panelTabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      store.ui.detailTab = tab.dataset.panelTab;
-      renderDetail();
-    });
+  refs.createCta?.addEventListener("click", () => (refs.createModal.hidden = false));
+  refs.createClose?.addEventListener("click", () => (refs.createModal.hidden = true));
+  refs.createCancel?.addEventListener("click", () => (refs.createModal.hidden = true));
+  refs.createModal?.addEventListener("click", (event) => {
+    if (event.target === refs.createModal) refs.createModal.hidden = true;
   });
 
-  refs.detailJoin.addEventListener("click", () => {
-    const msg = selectedClub.joinPolicy === "바로 가입" ? "가입 완료" : "가입 요청 완료";
-    showToast(msg);
+  refs.createForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const formData = new FormData(refs.createForm);
+    const request = {
+      name: String(formData.get("name") || "").trim(),
+      category: String(formData.get("category") || "").trim(),
+      moodLine: String(formData.get("moodLine") || "").trim(),
+      format: String(formData.get("format") || "").trim(),
+      joinPolicy: String(formData.get("joinPolicy") || "").trim(),
+    };
+    if (!request.name || !request.category || !request.moodLine) return;
+    store.pendingClubRequests.push(request);
+    refs.createForm.reset();
+    refs.createModal.hidden = true;
+    showToast("신청 완료");
+    if (store.isAdmin) renderAdmin();
   });
 
-  refs.panelClose.addEventListener("click", closePanel);
-  refs.overlay.addEventListener("click", closePanel);
-
-  refs.modalClose.addEventListener("click", closeModal);
-  refs.modal.addEventListener("click", (event) => {
-    if (event.target === refs.modal) {
-      closeModal();
-    }
+  refs.modalClose?.addEventListener("click", closeModal);
+  refs.modal?.addEventListener("click", (event) => {
+    if (event.target === refs.modal) closeModal();
   });
 
-  refs.createModal.addEventListener("click", (event) => {
-    if (event.target === refs.createModal) {
-      closeCreateModal();
-    }
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      closeModal();
-      closePanel();
-      closeCreateModal();
-    }
-  });
-
-  const params = new URLSearchParams(window.location.search);
-  const category = params.get("category");
-  if (["전체", "운동/건강", "취미/문화"].includes(category)) {
-    store.ui.selectedCategory = category;
-  }
-
-  refs.calendarClub.innerHTML = [
-    '<option value="all">전체</option>',
-    '<option value="mine">내 동아리만</option>',
-    ...store.clubs.map((club) => `<option value="${club.name}">${club.name}</option>`)
-  ].join("");
-
-  render();
-}
-
-function handleRsvpClick(event) {
-  const btn = event.target.closest("button[data-rsvp]");
-  if (!btn) return;
-  const card = event.target.closest("[data-event-id]");
-  if (!card) return;
-  store.rsvps[card.dataset.eventId] = btn.dataset.rsvp;
-  showToast(`RSVP: ${btn.dataset.rsvp}`);
   render();
 }
 

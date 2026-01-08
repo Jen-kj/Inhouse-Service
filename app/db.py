@@ -1,5 +1,4 @@
 ﻿import os
-import random
 import sqlite3
 from datetime import datetime, timedelta
 
@@ -40,6 +39,7 @@ def init_db():
                 title TEXT NOT NULL,
                 description TEXT,
                 requester TEXT NOT NULL,
+                requester_user_id TEXT,
                 status TEXT NOT NULL,
                 urgency TEXT NOT NULL,
                 attachment_name TEXT,
@@ -52,6 +52,11 @@ def init_db():
         columns = [row["name"] for row in conn.execute("PRAGMA table_info(service_desk_tickets)").fetchall()]
         if "attachment_name" not in columns:
             conn.execute("ALTER TABLE service_desk_tickets ADD COLUMN attachment_name TEXT")
+        if "requester_user_id" not in columns:
+            conn.execute("ALTER TABLE service_desk_tickets ADD COLUMN requester_user_id TEXT")
+        conn.commit()
+
+        _backfill_service_desk_requesters(conn)
         conn.commit()
 
         count = conn.execute("SELECT COUNT(*) FROM service_desk_tickets").fetchone()[0]
@@ -104,6 +109,7 @@ def init_db():
             seed_rooms(conn)
 
         _ensure_idea_hub_schema(conn)
+        _backfill_idea_authors(conn)
         conn.commit()
 
         idea_count = conn.execute("SELECT COUNT(*) FROM ideas").fetchone()[0]
@@ -146,66 +152,57 @@ def fetch_club_categories() -> list[str]:
 
 
 def seed_tickets(conn):
-    titles = [
-        "노트북 보안 패치 문의",
-        "VPN 접속 오류",
-        "맥북 충전기 교체",
-        "프로젝터 HDMI 케이블 요청",
-        "회의실 조명 수리 요청",
-        "에어컨 냉방 불량",
-        "사무용 의자 구매",
-        "모니터 암 구매",
-        "랜선 교체 요청",
-        "출입카드 재발급",
-        "프린터 토너 교체",
-        "책상 높이 조절 수리",
-        "노트북 SSD 교체",
-        "사무실 소독 일정 문의",
-        "공용 태블릿 구매",
-    ]
-    descriptions = [
-        "긴급 확인 부탁드립니다.",
-        "증상이 반복되고 있습니다.",
-        "필요 수량 2개입니다.",
-        "사진 첨부했습니다.",
-        "업무에 영향이 있습니다.",
-    ]
-    requesters = ["김민수", "이서연", "박준호", "최지우", "정하늘", "오유진"]
-    categories = list(CATEGORY_TO_TEAM.keys())
+    from app.fixtures.seed_data import service_desk_seed_tickets, user_name
 
-    now = datetime.now()
+    now_iso = _now_iso()
     samples = []
-    for i in range(12):
-        category = random.choice(categories)
-        status = random.choice(STATUS_OPTIONS)
-        urgency = random.choice(URGENCY_OPTIONS)
-        created_at = (now - timedelta(days=random.randint(0, 18), hours=random.randint(0, 8))).isoformat(
-            timespec="seconds"
-        )
+    for item in service_desk_seed_tickets(now_iso):
+        requester_user_id = item.get("requester_user_id")
         samples.append(
             {
-                "category": category,
-                "owner_team": CATEGORY_TO_TEAM[category],
-                "title": titles[i % len(titles)],
-                "description": random.choice(descriptions),
-                "requester": random.choice(requesters),
-                "status": status,
-                "urgency": urgency,
+                "category": item["category"],
+                "owner_team": item["owner_team"],
+                "title": item["title"],
+                "description": item.get("description") or "",
+                "requester": user_name(requester_user_id) or "nota_inhouse",
+                "requester_user_id": requester_user_id,
+                "status": item.get("status") or "PENDING",
+                "urgency": item.get("urgency") or "NORMAL",
                 "attachment_name": None,
                 "attachment_path": None,
-                "created_at": created_at,
-                "updated_at": created_at,
+                "created_at": item.get("created_at") or now_iso,
+                "updated_at": now_iso,
             }
         )
 
     conn.executemany(
         """
         INSERT INTO service_desk_tickets (
-            category, owner_team, title, description, requester, status,
-            urgency, attachment_name, attachment_path, created_at, updated_at
+            category,
+            owner_team,
+            title,
+            description,
+            requester,
+            requester_user_id,
+            status,
+            urgency,
+            attachment_name,
+            attachment_path,
+            created_at,
+            updated_at
         ) VALUES (
-            :category, :owner_team, :title, :description, :requester, :status,
-            :urgency, :attachment_name, :attachment_path, :created_at, :updated_at
+            :category,
+            :owner_team,
+            :title,
+            :description,
+            :requester,
+            :requester_user_id,
+            :status,
+            :urgency,
+            :attachment_name,
+            :attachment_path,
+            :created_at,
+            :updated_at
         )
         """,
         samples,
@@ -298,14 +295,22 @@ def fetch_summary():
 
 def create_ticket(data):
     now = _now_iso()
+    from app.fixtures.seed_data import find_user_id_by_name, user_name
+
+    requester_user_id = (data.get("requester_user_id") or "").strip() or None
+    requester = (data.get("requester") or "").strip() or None
+    if requester_user_id and not requester:
+        requester = user_name(requester_user_id) or requester_user_id
+    if requester and not requester_user_id:
+        requester_user_id = find_user_id_by_name(requester)
     with get_connection() as conn:
         cur = conn.execute(
             """
             INSERT INTO service_desk_tickets (
-                category, owner_team, title, description, requester, status,
+                category, owner_team, title, description, requester, requester_user_id, status,
                 urgency, attachment_name, attachment_path, created_at, updated_at
             ) VALUES (
-                :category, :owner_team, :title, :description, :requester, :status,
+                :category, :owner_team, :title, :description, :requester, :requester_user_id, :status,
                 :urgency, :attachment_name, :attachment_path, :created_at, :updated_at
             )
             """,
@@ -314,7 +319,8 @@ def create_ticket(data):
                 "owner_team": data["owner_team"],
                 "title": data["title"],
                 "description": data.get("description") or "",
-                "requester": data["requester"],
+                "requester": requester or "nota_inhouse",
+                "requester_user_id": requester_user_id,
                 "status": data.get("status", "PENDING"),
                 "urgency": data.get("urgency", "NORMAL"),
                 "attachment_name": data.get("attachment_name"),
@@ -817,6 +823,7 @@ def _ensure_idea_hub_schema(conn):
             content TEXT NOT NULL,
             category TEXT,
             author TEXT NOT NULL,
+            author_user_id TEXT,
             status TEXT NOT NULL DEFAULT '새로운 제안',
             created_at TEXT NOT NULL,
             completed_image TEXT,
@@ -842,6 +849,7 @@ def _ensure_idea_hub_schema(conn):
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             idea_id INTEGER NOT NULL,
             author TEXT NOT NULL,
+            author_user_id TEXT,
             comment TEXT NOT NULL,
             rating INTEGER,
             created_at TEXT NOT NULL,
@@ -862,150 +870,114 @@ def _ensure_idea_hub_schema(conn):
         """
     )
 
+    idea_columns = [row["name"] for row in conn.execute("PRAGMA table_info(ideas)").fetchall()]
+    if "author_user_id" not in idea_columns:
+        conn.execute("ALTER TABLE ideas ADD COLUMN author_user_id TEXT")
+
+    comment_columns = [row["name"] for row in conn.execute("PRAGMA table_info(idea_comments)").fetchall()]
+    if "author_user_id" not in comment_columns:
+        conn.execute("ALTER TABLE idea_comments ADD COLUMN author_user_id TEXT")
+
 
 def seed_ideas(conn):
-    now = datetime.now()
-    samples = [
-        {
-            "title": "사내 스낵바에 무설탕 음료 추가",
-            "content": "제로 탄산/무설탕 음료 옵션이 조금 더 있으면 좋겠습니다. 건강 챙기면서도 간식 즐기고 싶어요!",
-            "category": "복지",
-            "author": "김민수",
-            "status": "새로운 제안",
-            "created_at": (now - timedelta(hours=2)).isoformat(timespec="seconds"),
-            "completed_image": None,
-            "completed_description": None,
-        },
-        {
-            "title": "회의실 예약 알림을 슬랙으로 보내주세요",
-            "content": "회의 시작 10분 전에 예약자/참석자에게 슬랙 알림이 가면 노쇼가 줄어들 것 같아요.",
-            "category": "시스템",
-            "author": "이지은",
-            "status": "검토 중",
-            "created_at": (now - timedelta(days=1, hours=3)).isoformat(timespec="seconds"),
-            "completed_image": None,
-            "completed_description": None,
-        },
-        {
-            "title": "온보딩 체크리스트를 좀 더 보기 쉽게",
-            "content": "신규 입사자가 해야 할 것들이 한눈에 보이도록, 카드/배지 형태로 정리되면 좋겠어요.",
-            "category": "문화",
-            "author": "최서연",
-            "status": "해결 완료",
-            "created_at": (now - timedelta(days=6, hours=6)).isoformat(timespec="seconds"),
-            "completed_image": "https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=1200&q=60",
-            "completed_description": "온보딩 페이지에 완료 상태 표시와 섹션별 구분을 추가했습니다.",
-        },
-    ]
+    from app.fixtures.seed_data import idea_seed, user_name
 
-    for sample in samples:
+    now = datetime.now()
+    for sample in idea_seed(now):
+        author_user_id = sample.get("author_user_id")
         row = conn.execute(
             """
             INSERT INTO ideas (
-                title, content, category, author, status, created_at, completed_image, completed_description
+                title,
+                content,
+                category,
+                author,
+                author_user_id,
+                status,
+                created_at,
+                completed_image,
+                completed_description
             ) VALUES (
-                :title, :content, :category, :author, :status, :created_at, :completed_image, :completed_description
+                :title,
+                :content,
+                :category,
+                :author,
+                :author_user_id,
+                :status,
+                :created_at,
+                :completed_image,
+                :completed_description
             )
             """,
-            sample,
+            {
+                "title": sample["title"],
+                "content": sample["content"],
+                "category": sample.get("category"),
+                "author": user_name(author_user_id) or "익명",
+                "author_user_id": author_user_id,
+                "status": sample.get("status") or "새로운 제안",
+                "created_at": sample["created_at"],
+                "completed_image": sample.get("completed_image"),
+                "completed_description": sample.get("completed_description"),
+            },
         )
         idea_id = row.lastrowid
 
-        created_at = sample["created_at"]
-        base_time = datetime.fromisoformat(created_at)
-        review_time = (base_time + timedelta(hours=8)).isoformat(timespec="seconds")
-        done_time = (base_time + timedelta(days=3)).isoformat(timespec="seconds")
-        conn.execute(
-            """
-            INSERT INTO idea_timeline (idea_id, status, message, created_at)
-            VALUES (:idea_id, :status, :message, :created_at)
-            """,
-            {
-                "idea_id": idea_id,
-                "status": "접수 완료",
-                "message": "아이디어가 접수되었습니다.",
-                "created_at": created_at,
-            },
-        )
-
-        if sample["status"] in ("검토 중", "해결 완료"):
+        for item in sample.get("timeline") or []:
             conn.execute(
                 """
                 INSERT INTO idea_timeline (idea_id, status, message, created_at)
                 VALUES (:idea_id, :status, :message, :created_at)
                 """,
-                {
-                    "idea_id": idea_id,
-                    "status": "검토 중",
-                    "message": "담당 팀에서 검토를 시작했습니다.",
-                    "created_at": review_time,
-                },
+                {"idea_id": idea_id, **item},
             )
 
-        if sample["status"] == "해결 완료":
+        for comment in sample.get("comments") or []:
+            comment_author_id = comment.get("author_user_id")
             conn.execute(
                 """
-                INSERT INTO idea_timeline (idea_id, status, message, created_at)
-                VALUES (:idea_id, :status, :message, :created_at)
+                INSERT INTO idea_comments (idea_id, author, author_user_id, comment, rating, created_at)
+                VALUES (:idea_id, :author, :author_user_id, :comment, :rating, :created_at)
                 """,
                 {
                     "idea_id": idea_id,
-                    "status": "해결 완료",
-                    "message": "개선 사항이 적용되었습니다.",
-                    "created_at": done_time,
+                    "author": user_name(comment_author_id) or "익명",
+                    "author_user_id": comment_author_id,
+                    "comment": comment["comment"],
+                    "rating": comment.get("rating"),
+                    "created_at": comment["created_at"],
                 },
             )
 
+        for user_id in sample.get("upvotes") or []:
             conn.execute(
                 """
-                INSERT INTO idea_comments (idea_id, author, comment, rating, created_at)
-                VALUES (:idea_id, :author, :comment, :rating, :created_at)
+                INSERT OR IGNORE INTO idea_upvotes (idea_id, user_id, created_at)
+                VALUES (:idea_id, :user_id, :created_at)
                 """,
-                {
-                    "idea_id": idea_id,
-                    "author": "정우진",
-                    "comment": "완성도 좋고, 체크도 훨씬 쉬워졌어요!",
-                    "rating": 5,
-                    "created_at": (datetime.fromisoformat(done_time) + timedelta(hours=4)).isoformat(timespec="seconds"),
-                },
+                {"idea_id": idea_id, "user_id": user_id, "created_at": _now_iso()},
             )
-            conn.execute(
-                """
-                INSERT INTO idea_comments (idea_id, author, comment, rating, created_at)
-                VALUES (:idea_id, :author, :comment, :rating, :created_at)
-                """,
-                {
-                    "idea_id": idea_id,
-                    "author": "박준호",
-                    "comment": "신규 입사자 입장에서 확실히 덜 헷갈려요.",
-                    "rating": 4,
-                    "created_at": (datetime.fromisoformat(done_time) + timedelta(days=1, hours=2)).isoformat(timespec="seconds"),
-                },
-            )
-
-            for user_id in ["user_001", "user_002", "user_003", "user_004"]:
-                conn.execute(
-                    """
-                    INSERT OR IGNORE INTO idea_upvotes (idea_id, user_id, created_at)
-                    VALUES (:idea_id, :user_id, :created_at)
-                    """,
-                    {"idea_id": idea_id, "user_id": user_id, "created_at": _now_iso()},
-                )
 
 
 def create_idea(title, content, category, author):
     now = _now_iso()
+    from app.fixtures.seed_data import find_user_id_by_name, user_name
+
+    author = (author or "").strip()
+    author_user_id = find_user_id_by_name(author) if author else None
+    author_name = author or (user_name(author_user_id) if author_user_id else "")
     with get_connection() as conn:
         row = conn.execute(
             """
-            INSERT INTO ideas (title, content, category, author, status, created_at)
-            VALUES (:title, :content, :category, :author, :status, :created_at)
+            INSERT INTO ideas (title, content, category, author, author_user_id, status, created_at)
+            VALUES (:title, :content, :category, :author, :author_user_id, :status, :created_at)
             """,
             {
                 "title": title,
                 "content": content,
                 "category": category or None,
-                "author": author,
+                "author": author_name or "익명",
+                "author_user_id": author_user_id,
                 "status": "새로운 제안",
                 "created_at": now,
             },
@@ -1059,7 +1031,7 @@ def _fetch_idea_timeline(conn, idea_id: int):
 def _fetch_idea_comments(conn, idea_id: int):
     rows = conn.execute(
         """
-        SELECT author, comment, rating, created_at
+        SELECT author, author_user_id, comment, rating, created_at
         FROM idea_comments
         WHERE idea_id = :idea_id
         ORDER BY created_at DESC
@@ -1085,6 +1057,7 @@ def fetch_ideas(status: str | None = None):
                 i.content,
                 i.category,
                 i.author,
+                i.author_user_id,
                 i.status,
                 i.created_at,
                 i.completed_image,
@@ -1151,15 +1124,21 @@ def upvote_idea(idea_id: int, user_id: str):
 
 def add_idea_comment(idea_id: int, author: str, comment: str, rating: int | None):
     now = _now_iso()
+    from app.fixtures.seed_data import find_user_id_by_name, user_name
+
+    author = (author or "").strip()
+    author_user_id = find_user_id_by_name(author) if author else None
+    author_name = author or (user_name(author_user_id) if author_user_id else "")
     with get_connection() as conn:
         conn.execute(
             """
-            INSERT INTO idea_comments (idea_id, author, comment, rating, created_at)
-            VALUES (:idea_id, :author, :comment, :rating, :created_at)
+            INSERT INTO idea_comments (idea_id, author, author_user_id, comment, rating, created_at)
+            VALUES (:idea_id, :author, :author_user_id, :comment, :rating, :created_at)
             """,
             {
                 "idea_id": idea_id,
-                "author": author,
+                "author": author_name or "익명",
+                "author_user_id": author_user_id,
                 "comment": comment,
                 "rating": rating,
                 "created_at": now,
@@ -1168,3 +1147,46 @@ def add_idea_comment(idea_id: int, author: str, comment: str, rating: int | None
         conn.commit()
 
     return now
+
+
+def _backfill_service_desk_requesters(conn: sqlite3.Connection) -> None:
+    from app.fixtures.seed_data import find_user_id_by_name
+
+    rows = conn.execute(
+        "SELECT id, requester FROM service_desk_tickets WHERE requester_user_id IS NULL OR requester_user_id = ''"
+    ).fetchall()
+    for row in rows:
+        requester = (row["requester"] or "").strip()
+        requester_user_id = find_user_id_by_name(requester) or "user_010"
+        conn.execute(
+            "UPDATE service_desk_tickets SET requester_user_id = :uid WHERE id = :id",
+            {"uid": requester_user_id, "id": row["id"]},
+        )
+
+
+def _backfill_idea_authors(conn: sqlite3.Connection) -> None:
+    from app.fixtures.seed_data import find_user_id_by_name
+
+    rows = conn.execute(
+        "SELECT id, author FROM ideas WHERE author_user_id IS NULL OR author_user_id = ''"
+    ).fetchall()
+    for row in rows:
+        author = (row["author"] or "").strip()
+        author_user_id = find_user_id_by_name(author)
+        if author_user_id:
+            conn.execute(
+                "UPDATE ideas SET author_user_id = :uid WHERE id = :id",
+                {"uid": author_user_id, "id": row["id"]},
+            )
+
+    comment_rows = conn.execute(
+        "SELECT id, author FROM idea_comments WHERE author_user_id IS NULL OR author_user_id = ''"
+    ).fetchall()
+    for row in comment_rows:
+        author = (row["author"] or "").strip()
+        author_user_id = find_user_id_by_name(author)
+        if author_user_id:
+            conn.execute(
+                "UPDATE idea_comments SET author_user_id = :uid WHERE id = :id",
+                {"uid": author_user_id, "id": row["id"]},
+            )

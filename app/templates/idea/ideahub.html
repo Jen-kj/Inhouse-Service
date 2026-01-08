@@ -1,20 +1,14 @@
 {% extends "base.html" %}
 {% set title = "Idea Hub" %}
+{% from "_page_header.html" import page_header %}
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/ideahub.css') }}">
 
 <div class="page idea-page" data-page="idea">
-  <header class="idea-header">
-    <div class="idea-header-title">
-      <div class="page-eyebrow">NOTA IDEA</div>
-      <h1 class="page-title">Idea Hub</h1>
-      <p class="page-subtitle">더 나은 노타를 만들기 위한 아이디어를 공유해요.</p>
-    </div>
-    <div class="idea-header-actions">
-      <button class="btn idea-btn-primary" id="submitIdeaBtn" type="button">+ 아이디어 제안하기</button>
-    </div>
-  </header>
+  {% call page_header("NOTA IDEA", "Idea Hub", "더 나은 노타를 만들기 위한 아이디어를 공유해요.") %}
+    <button class="btn idea-btn-primary" id="submitIdeaBtn" type="button">+ 아이디어 제안하기</button>
+  {% endcall %}
 
   <div class="idea-sticky">
     <div class="idea-filters" role="tablist" aria-label="아이디어 상태 필터">

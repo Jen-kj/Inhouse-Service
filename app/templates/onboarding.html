@@ -1,19 +1,17 @@
 {% extends "base.html" %}
 
+{% set title = "Onboarding" %}
+{% from "_page_header.html" import page_header %}
+
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/onboarding.css') }}">
 
-<div class="onboarding-shell">
-  <div class="onboarding-container">
-    <header class="onboarding-header">
-      <div>
-        <div class="page-eyebrow">사내 온보딩</div>
-        <h1 class="page-title">Onboarding</h1>
-        <p class="page-subtitle">노타 행성에 착륙한 것을 환영합니다! 퀘스트를 완료하고 궁금한 점을 해결하세요.</p>
-      </div>
-    </header>
+<div class="page onboarding-page" data-page="onboarding">
+  {{ page_header("사내 온보딩", "Onboarding", "노타 행성에 착륙한 것을 환영합니다! 퀘스트를 완료하고 궁금한 점을 해결하세요.") }}
 
-    <div class="dashboard">
+  <div class="onboarding-shell">
+    <div class="onboarding-container">
+      <div class="dashboard">
       <div class="quest-panel">
         <div class="quest-header">
           <h2>📋 나의 퀘스트</h2>
@@ -138,6 +136,7 @@
       </div>
     </div>
   </div>
+</div>
 </div>
 
 <div class="congrats-toast" id="congratsToast">퀘스트 완료!</div>

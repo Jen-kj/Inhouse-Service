@@ -13,10 +13,6 @@
   --club-shadow: var(--app-shadow);
 }
 
-.club-page {
-  padding: 32px 28px;
-}
-
 .club-toggle {
   display: flex;
   align-items: center;
@@ -846,18 +842,7 @@
   }
 }
 
-@media (max-width: 900px) {
-  .club-page .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
 @media (max-width: 720px) {
-  .club-page {
-    padding: 18px;
-  }
-
   .club-grid {
     grid-template-columns: 1fr;
   }

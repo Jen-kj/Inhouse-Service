@@ -1,14 +1,11 @@
 ﻿{% extends "base.html" %}
 {% set title = "Nota Space - Room Booking" %}
 
+{% from "_page_header.html" import page_header %}
+
 {% block content %}
 <div class="page" data-page="room-booking">
-  <div class="page-header">
-    <div>
-      <div class="page-eyebrow">Nota Space</div>
-      <h1 class="page-title">회의실 예약</h1>
-      <p class="page-subtitle">회의실 예약 현황을 한눈에 보고, 바로 예약하세요.</p>
-    </div>
+  {% call page_header("Nota Space", "회의실 예약", "회의실 예약 현황을 한눈에 보고, 바로 예약하세요.") %}
     <div class="ns-header-actions">
       <div class="ns-date">
         <label for="ns-date" class="form-label">날짜</label>
@@ -16,7 +13,7 @@
       </div>
       <a class="btn ns-btn-light" href="/nota-space/room-booking/list">예약 목록</a>
     </div>
-  </div>
+  {% endcall %}
 
   <div class="ns-layout">
     <section class="ns-card">

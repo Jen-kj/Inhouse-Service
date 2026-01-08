@@ -1,0 +1,15 @@
+{% macro page_header(eyebrow, title, subtitle) -%}
+  <header class="page-header">
+    <div class="page-title-block">
+      {% if eyebrow %}<div class="page-eyebrow">{{ eyebrow }}</div>{% endif %}
+      {% if title %}<h1 class="page-title">{{ title }}</h1>{% endif %}
+      {% if subtitle %}<p class="page-subtitle">{{ subtitle }}</p>{% endif %}
+    </div>
+    {% if caller %}
+      <div class="page-header-actions">
+        {{ caller() }}
+      </div>
+    {% endif %}
+  </header>
+{%- endmacro %}
+

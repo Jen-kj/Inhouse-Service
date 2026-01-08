@@ -2,17 +2,13 @@
 {% set title = "Nota Space - 예약 목록" %}
 
 {% block content %}
+{% from "_page_header.html" import page_header %}
 <div class="page" data-page="room-booking-list">
-  <div class="page-header">
-    <div>
-      <div class="page-eyebrow">Nota Space</div>
-      <h1 class="page-title">예약 목록</h1>
-      <p class="page-subtitle">내가 예약한 회의실 목록을 확인합니다.</p>
-    </div>
+  {% call page_header("Nota Space", "예약 목록", "내가 예약한 회의실 목록을 확인합니다.") %}
     <div class="ns-actions">
       <a class="btn ns-btn-light" href="/nota-space/meeting-log/new">+ 회의록 작성</a>
     </div>
-  </div>
+  {% endcall %}
 
   <section class="ns-card">
     <div class="ns-card-title">예약 리스트</div>

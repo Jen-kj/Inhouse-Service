@@ -12,20 +12,6 @@
   --idea-card-radius: 14px;
 }
 
-.idea-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 18px;
-}
-
-.idea-header-actions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
 .idea-btn-primary {
   background: var(--idea-accent);
   color: #fff;
@@ -42,7 +28,7 @@
 
 .idea-sticky {
   position: sticky;
-  top: 18px;
+  top: var(--sticky-top);
   z-index: 20;
   padding: 14px 14px;
   border: 1px solid var(--app-border);

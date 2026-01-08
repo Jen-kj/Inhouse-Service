@@ -17,6 +17,7 @@ except Exception:  # pragma: no cover
     genai = None
 
 from . import bp
+from app.fixtures.seed_data import club_seed_store
 from app.db import (
     BASE_DIR,
     CATEGORY_TO_TEAM,
@@ -45,8 +46,6 @@ from app.db import (
     upvote_idea,
     update_ticket_status,
 )
-
-REQUESTER_POOL = ["김민수", "이서연", "박준호", "최지우", "정하늘", "오유진", "nota_inhouse"]
 
 _WHISPER_MODEL = None
 _OPENAI_CLIENT = None
@@ -529,8 +528,8 @@ def _ensure_ffmpeg_in_path():
     os.environ["PATH"] = f"{ffmpeg_dir};{os.environ.get('PATH', '')}"
 
 
-def _pick_requester():
-    return random.choice(REQUESTER_POOL)
+def _current_user_id() -> str:
+    return "user_001"
 
 
 def _save_upload(file, folder_name):
@@ -723,7 +722,7 @@ def _render_summary_text(summary: dict) -> str:
 
 @bp.get("/")
 def home():
-    return render_template("empty_page.html", active="")
+    return redirect(url_for("inhouse_service.service_desk"))
 
 
 @bp.get("/service-desk")
@@ -792,6 +791,11 @@ def clubs_home():
 @bp.get("/api/clubs/categories")
 def get_club_categories():
     return jsonify({"categories": fetch_club_categories()})
+
+
+@bp.get("/api/clubs/seed")
+def get_club_seed():
+    return jsonify(club_seed_store(_current_user_id()))
 
 
 @bp.get("/onboarding")
@@ -925,7 +929,7 @@ def create_service_desk_request():
             "owner_team": CATEGORY_TO_TEAM[category],
             "title": title,
             "description": description,
-            "requester": _pick_requester(),
+            "requester_user_id": _current_user_id(),
             "urgency": urgency,
             "attachment_path": attachment_path,
             "attachment_name": attachment_name,
